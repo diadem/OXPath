@@ -1,0 +1,51 @@
+/**
+ * 
+ */
+package uk.ac.ox.comlab.oxpath.oxpathTreeWalker;
+
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import com.gargoylesoftware.htmlunit.javascript.host.css.ComputedCSSStyleDeclaration;
+
+/**
+ * Class used for exposing Rhino methods for accessing JavaScript features
+ * @author AndrewJSel
+ *
+ */
+public class CSSProperties {
+
+	/**
+	 * Constructor that maps all CSS Property names with their Rhino functions
+	 */
+	public CSSProperties() {
+		Method methods[] = ComputedCSSStyleDeclaration.class.getDeclaredMethods();
+        for (int i = 0; i < methods.length; i++) {
+        	String name = methods[i].getName();
+        	if (name.startsWith("jsxGet_") && methods[i].getParameterTypes().length == 0) {
+        		String cssName = name.substring(7);
+        		Pattern p = Pattern.compile("(\\p{Upper})");
+        		Matcher m = p.matcher(cssName);
+        		StringBuffer sb = new StringBuffer();
+        		while (m.find()) {
+        			m.appendReplacement(sb, "-$1");
+        		}	
+        		cssName = m.appendTail(sb).toString().toLowerCase();
+        		cssProperties.put(cssName,methods[i]);
+        	}
+        }
+	}
+	
+	public Method getMethod(String key) {
+		return cssProperties.get(key);
+	}
+	
+	/**
+	 * Instance field storing the cssProperties 
+	 */
+	Map<String,Method> cssProperties = new HashMap<String,Method>();
+	
+}

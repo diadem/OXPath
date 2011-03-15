@@ -1,0 +1,1265 @@
+/*
+ * Copyright (c)2011, DIADEM Team
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the DIADEM team nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL DIADEM Team BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+ /**
+ * JJTree template file for specifying the OXPath script parser
+ */options{  JDK_VERSION = "1.5";  static = false;
+  LOOKAHEAD = 1;
+//  IGNORE_CASE =true;}PARSER_BEGIN(OXPathScripter)package uk.ac.ox.comlab.oxpath.scriptParser;
+
+import java.io.FileReader;
+
+import java.lang.StringBuilder;
+
+import java.io.StringReader;
+
+import uk.ac.ox.comlab.oxpath.BadDataException;
+
+public class OXPathScripter{
+  public OXPathScripter()  {
+      }
+
+//use as a testing environment
+  public static void main(String args [])  {	
+//    System.out.println("Reading from standard input...");//    System.out.print("Enter an expression like \"1+(2+3)*var;\" :");    try    {
+      FileReader reader = new FileReader(args[0]);
+//      new OXPathScripter(reader);
+      OXPathScripter oxpathscripter = new OXPathScripter(reader);      SimpleNode n = oxpathscripter.Script();//      OXPathScripter.dump(n,"");//      System.out.println("Thank you.");    }    catch (Exception e)    {      System.out.println("Oops.");      System.out.println(e.getMessage());
+      e.printStackTrace();    }  }
+
+   /**
+   * Returns JJTree of script
+   */
+   public static SimpleNode getJJTree(String inputfile) throws Exception	   {
+//	     SimpleNode n;
+//	     try//	     {	       FileReader reader = new FileReader(inputfile);
+	       OXPathScripter oxpathscripter = new OXPathScripter(reader);
+	       SimpleNode n = oxpathscripter.Script();
+	       return n;
+//	     }
+//	     catch (Exception e)//	     {//      System.out.println("Oops.");//      System.out.println(e.getMessage());//      e.printStackTrace();
+//     }
+	   }
+
+	   public static SimpleNode getJJTreeFromString(String in) throws Exception
+	   {		      return new OXPathScripter(new StringReader(in)).Script();
+	   }
+
+	   protected static String process(SimpleNode n, String value)	   {	     n.jjtSetValue(value);
+	     return (String) n.jjtGetValue();
+	   }
+
+	   public static String getValue(SimpleNode n) throws RuntimeException
+	   {
+	     if (n.jjtGetValue() instanceof String)	     {	       return (String) n.jjtGetValue();
+	     }
+	     else throw new RuntimeException("Node value state not String object!");	   }
+
+	   public static void dump(SimpleNode root, String prefix) {
+	    if (!(root.jjtGetValue() instanceof String))	      {System.out.println(root.toString(prefix));}	    	    else
+	      System.out.println(root.toString(prefix)+ "["+root.jjtGetValue()+"]");
+    if (root.jjtGetNumChildren() > 0) {
+      for (int i = 0; i < root.jjtGetNumChildren(); ++i) {
+        SimpleNode n = (SimpleNode)root.jjtGetChild(i);
+        if (n != null) {
+          dump(n,prefix + " ");
+        }
+      }
+    }
+  }
+
+  public static String stringDump(SimpleNode root, String prefix)  {    return stringDumpInt(root,prefix).toString();
+  }
+
+  public static StringBuilder stringDumpInt(SimpleNode root, String prefix)  {    StringBuilder rv = new StringBuilder();
+    if (!(root.jjtGetValue() instanceof String))
+	      {rv.append(root.toString(prefix) + "\n");}	    
+	    else
+	      {rv.append(root.toString(prefix)+ "["+root.jjtGetValue()+"]\n");}
+	    if (root.jjtGetNumChildren() > 0) {
+      for (int i = 0; i < root.jjtGetNumChildren(); ++i) {
+        SimpleNode n = (SimpleNode)root.jjtGetChild(i);
+        if (n != null) {
+          rv.append(stringDumpInt(n,prefix + " "));
+        }
+      }
+    }
+    return rv;
+  }
+
+	   public static SimpleNode safeGetChild(SimpleNode parent, int index) throws BadDataException {
+     if (isSafeChild(parent,index))     {
+       return (SimpleNode) parent.jjtGetChild(index);     }
+     else throw new BadDataException("Not an OXPath AST node!");
+	   }
+
+	   public static boolean isSafeChild(SimpleNode parent, int index) {
+	     if (parent.jjtGetChild(index) instanceof SimpleNode)
+	     {	       return true;
+	     }
+	     else	     {	       return false;
+	     }
+	   }
+
+	   public static boolean hasChildByName(SimpleNode parent, String name)	   {	     for (int i = 0; i<parent.jjtGetNumChildren(); i++)
+	     {
+	       if (parent.jjtGetChild(i).toString().equals(name))
+	       {
+	         return true;
+	       }
+     }
+     return false;
+	   }
+
+	   	public static boolean hasDescendantOrSelfByName(SimpleNode parent, String name) throws BadDataException
+	   {
+	     if (parent.toString().equals(name)) return true;
+	     else	     {	       for (int i = 0; i<parent.jjtGetNumChildren(); i++)
+	           {
+	              if (hasDescendantOrSelfByName(toSimpleNode(parent.jjtGetChild(i)),name)) {
+	                  return true;
+	              }
+           }
+     }
+     return false;
+	   }     	       
+
+	   public static SimpleNode getChildByName(SimpleNode parent, String name) throws BadDataException	   {
+	     for (int i = 0; i<parent.jjtGetNumChildren(); i++)	     {
+	       if (parent.jjtGetChild(i).toString().equals(name))
+	       {	         return safeGetChild(parent,i);
+	       }     }
+     throw new BadDataException("Child not found!");	   }
+		  
+			   public static int test(String tester)
+			   {
+		    System.out.println(tester);
+    return 1;   }
+
+   public static boolean isDescendant(Node a, Node d)   {
+     if (a.equals(d)) return true;
+     Node temp = d.jjtGetParent();	 while (!(temp==null))	 {	     if (a.equals(temp)) return true;
+	     temp = temp.jjtGetParent();
+	 }
+	 return false;
+   }
+
+   public static int getNodeID(SimpleNode node)   {     return node.id;
+   }
+
+   public static SimpleNode toSimpleNode(Node n) throws BadDataException
+   {    if (n instanceof SimpleNode) return (SimpleNode) n;
+    else throw new BadDataException("Node can't be cast as a SimpleNode");
+  }
+
+   
+}PARSER_END(OXPathScripter)
+< IN_URL > TOKEN :{  < APOSTROPHE_URL : "'" >
+| < QUOTE_URL : "\"" >
+}
+
+////Single quote processing////< DEFAULT > MORE ://{//< "'" > : IN_SINGLE_QUOTE_STRING_DEFAULT//}////< IN_SINGLE_QUOTE_STRING_DEFAULT >//TOKEN ://{//< SINGLE_QUOTE_STRING_DEFAULT : "'" > : DEFAULT//}////< IN_SINGLE_QUOTE_STRING_DEFAULT >//MORE ://{//< ~["'"] >//}
+
+//< IN_XQ > MORE ://{//< "'" > : IN_SINGLE_QUOTE_STRING_XQ//}////< IN_SINGLE_QUOTE_STRING_XQ >//TOKEN ://{//< SINGLE_QUOTE_STRING_XQ : "'" > : IN_XQ//}////< IN_SINGLE_QUOTE_STRING_XQ >//MORE ://{//< ~["'"] >//}
+
+//Double quote processing
+
+//< DEFAULT > MORE ://{//< "\"" > : IN_DOUBLE_QUOTE_STRING_DEFAULT//}////< IN_DOUBLE_QUOTE_STRING_DEFAULT >//TOKEN ://{//< DOUBLE_QUOTE_STRING_DEFAULT : "\"" > : DEFAULT//}////< IN_DOUBLE_QUOTE_STRING_DEFAULT >//MORE ://{//< ~["\""] >//}////////< IN_XQ > MORE ://{//< "\"" > : IN_DOUBLE_QUOTE_STRING_XQ//}////< IN_DOUBLE_QUOTE_STRING_XQ >//TOKEN ://{//< DOUBLE_QUOTE_STRING_XQ : "\"" > : IN_XQ//}////< IN_DOUBLE_QUOTE_STRING_XQ >//MORE ://{//< ~["\""] >//}
+
+< DEFAULT , IN_URL , IN_PATH, IN_PATH_OP > SKIP :  /* IN-LINE WHITE SPACE*/{   <  SPACE :  " " >|  <  TAB : "\t" >
+|  <  NEWLINE : ("\n"|"\r"|"\r\n")>
+}
+
+< DEFAULT > TOKEN : /* KEYWORDS */
+{//  < XQBLOCK : "XQ:" > : IN_XQ 
+//| < XQ : "XQ" >//Not great, but only time I do this
+  < DATABASE : ("database") ( < SPACE > | < TAB > | < NEWLINE > )* <EQUALS_DEFAULT > > : IN_PATH
+| < URL : ("url") ( < SPACE > | < TAB > | < NEWLINE > )* <EQUALS_DEFAULT > > : IN_URL
+//| < PATH_URL : ("path") ( < SPACE > | < TAB > | < NEWLINE > )* < EQUALS_DEFAULT> ( < SPACE > | < TAB > | < NEWLINE > )* "{" >      : IN_URL  
+| < PATH : ("path") ( < SPACE > | < TAB > | < NEWLINE > )* <EQUALS_DEFAULT > > : IN_PATH
+//| < VARIABLE_DEFAULT : "$" < QNAME > ( < SPACE > | < TAB > | < NEWLINE > )* <EQUALS_DEFAULT > > : IN_PATH
+| < VARIABLE_DEFAULT : < DOLLAR > < QNAME > > : DEFAULT
+//| < QNAME_DEFAULT : < QNAME > ( < SPACE > | < TAB > | < NEWLINE > )* <EQUALS_DEFAULT > > : IN_PATH
+| < QNAME_DEFAULT : < QNAME > > : DEFAULT
+| < XQBLOCK : "Scraper" ( < SPACE > | < TAB > | < NEWLINE > )* ":" > : DEFAULT
+//| < DEP : ("dep") >
+//| < COMMONANCESTOR : "CA" >
+//| < PROTOCOL : "http" ("s")? >
+//| < DBNAMEEXT : ".cfg" >//| < OXPNAMEEXT : ".oxp" >
+//| < WHILE : "while" >
+//| < CLICK : "click" >//| < SUBMIT : "submit" >
+}
+
+< IN_URL > TOKEN :
+{  < PROTOCOL : "http" ("s")? ":" "/" "/">
+}
+
+< IN_PATH > TOKEN :
+{
+//  < XQBLOCK : "Scraper" ( < SPACE > | < TAB > | < NEWLINE > )* ":" > : IN_PATH//  < XQ : "Scraper" >//Not great, but only time I do this
+//| < DEP : "dep" >
+  < FOCUS : "focus" > : IN_PATH
+| < CLICK : "click" > : IN_PATH
+| < DBLCLICK : "dblclick" > : IN_PATH
+| < MOUSEDOWN : "mousedown" > : IN_PATH
+| < MOUSEENTER : "mouseenter" > : IN_PATH
+| < MOUSEMOVE : "mousemove" > : IN_PATH
+| < MOUSEOVER : "event" > : IN_PATH
+| < MOUSEOUT : "mouseout" > : IN_PATH
+| < MOUSEUP : "mouseup" > : IN_PATH
+| < WHEEL : "wheel" > : IN_PATH
+| < SUBMIT : "submit" > : IN_PATH
+| < UNCLICK : "unclick" > : IN_PATH
+| < CHECK : "check" > : IN_PATH
+| < UNCHECK : "uncheck" > : IN_PATH
+//| < WHILE : "while" >
+}
+
+//< IN_PATH , IN_XQ > TOKEN ://{// < NAMECHAR : < NAMESTARTCHAR > | "-" | "." | ["0"-"9"] >//}
+
+< IN_URL > TOKEN :
+{
+  < END_URL_IN_PATH : ">" > : IN_PATH
+//  < END_URL_IN_PATH : ">" ( < SPACE > | < TAB > | < NEWLINE > )* "/" ( < SPACE > | < TAB > | < NEWLINE > )* "}" > : IN_PATH | < END_URL : "}" > : IN_PATH
+| < SLASH_URL : "/" >
+| < QUESTION_URL : "?" >
+| < MINUS_URL : "-" >
+| < UNDERSCORE_URL : "_" >
+| < PERIOD_URL : "." >
+| < AMPERSAND_URL : "&" >
+| < EQUALS_URL : "=" >
+| < DOLLAR_URL : "$" >
+| < PERCENT_URL : "%" >
+| < AT_URL : "@" >
+| < PLUS_URL : "+" >
+| < EXCLAIMATION_URL : "!" >
+| < STAR_URL : "*" >
+| < OPEN_PARAN_URL : "(" >
+| < CLOSE_PARAN_URL : ")" >
+| < COMMA_URL : "," >
+}
+
+< IN_URL > TOKEN : /* VALUE RETURNS FOR URL Expression */
+{
+  < LOWER_ALPHA : ["a"-"z"] >
+| < UPPER_ALPHA : ["A"-"Z"] >
+| < DIGIT : ["0"-"9"] >
+}
+
+< DEFAULT, IN_PATH, IN_PATH_OP, IN_URL > TOKEN : /* Handling line terminals */
+	{	  < ENDLINE : ";" > : DEFAULT
+	}
+
+//	< IN_XQ > TOKEN : /* Handling line terminals//	          Need to transition state to default until IN_XQ, then stay in XQ *///	{//	  < ENDLINE_XQ : ";" >//	}	       
+< DEFAULT > TOKEN :
+{
+//  < URL_PATH : "=" ( < SPACE > | < TAB > | < NEWLINE > )* "{" >      : IN_URL  < EQUALS_DEFAULT : "=" > : IN_PATH
+//| < VARIABLE_DEFAULT : "$" < QNAME > > : IN_PATH_OP
+}
+
+< IN_PATH , IN_PATH_OP > TOKEN : /* EXPR TOKEN */
+{
+  < DOC_BEGIN : "doc" ( < SPACE > | < TAB > | < NEWLINE > )* "(" > : IN_PATH
+| < OPEN_PARAN : "(" > : IN_PATH
+| < CLOSE_PARAN : ")" > : IN_PATH_OP
+| < OPEN_OPTIONAL : "[?" > : IN_PATH
+| < OPEN_BRACKET : "[" > : IN_PATH
+| < CLOSE_BRACKET : "]" > : IN_PATH_OP
+| < BEGIN_URL_IN_PATH : "{" ( < SPACE > | < TAB > | < NEWLINE > )* "<" > : IN_URL
+| < OPEN_CURLY : "{" > : IN_PATH
+| < CLOSE_CURLY : "}" > :IN_PATH
+//| < END_ABSOLUTE_ACTION : < SLASH > ( < SPACE > | < TAB > | < NEWLINE > )* < CLOSE_CURLY > > : IN_PATH
+| < COMMA : "," > : IN_PATH
+| < NUMBER : (< DIGITS > "." (< DIGITS >)?) | ("." < DIGITS >) > : IN_PATH_OP//Integers are returned as <DIGITS > tokens
+//| < LITERAL : < SINGLE_QUOTE_STRING_PATH > | < DOUBLE_QUOTE_STRING_PATH > > : IN_PATH_OP
+| < DESCENDENT_OR_SELF_SHORT : "/" ( < SPACE > | < TAB > | < NEWLINE > )* "/" > : IN_PATH
+| < BEGIN_KLEENE_STAR : "/" ( < SPACE > | < TAB > | < NEWLINE > )* "(" > : IN_PATH
+| < SLASH : "/" > : IN_PATH
+| < BEGIN_EXTRACT_MARK : ":<" > : IN_PATH
+//| < END_EXTRACT_MARK : ">" ( < SPACE > | < TAB > | < NEWLINE > )* ":" > : IN_PATH
+//| < END_PATH : "/" ( < SPACE > | < TAB > | < NEWLINE > )* "<" > : IN_PATH
+//| < ACTION_PRED :( < WAIT > | < UNTIL > ) > : IN_PATH
+
+}
+
+< IN_PATH > TOKEN : /* EXPR TOKEN */
+{
+  < OXPATH_AXISNAME : ( "style"
+//    	             | "next-field" 
+//                 | "descendant-or-following-field"
+                 | "descendant-or-following"
+//                 | "previous-field"
+//                 | "ancestor-or-preceding-field"
+                 | "ancestor-or-preceding" ) ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : IN_PATH
+//AXES WITHOUT DIRECTION ARE FORWARD AXEs  
+| < XPATH_FORWARD_AXISNAME : ( //"ancestor-or-self"
+//                 | "ancestor" |
+	                   "attribute"
+                 | "child"
+                 | "descendant-or-self"
+                 | "descendant"
+                 | "following-sibling"
+                 | "following"
+                 | "namespace"
+//                 | "parent"
+//                 | "preceding-sibling"
+//                 | "preceding"
+                 | "self" ) ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : IN_PATH
+| < XPATH_BACKWARD_AXISNAME : ( "ancestor-or-self"
+                 | "ancestor"
+//                 | "attribute"
+//                 | "child"
+//                 | "descendent-or-self"
+//                 | "descendent"
+//                 | "following-sibling"
+//                 | "following"
+//                 | "namespace"
+                 | "parent"
+                 | "preceding-sibling"
+                 | "preceding"
+//                 | "self"
+                 ) ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : IN_PATH
+| < AXIS : "::" > : IN_PATH
+| < NODE_TYPE : ( < COMMENT > | < TEXT > | < PROCESSING_INSTRUCTION > | < NODE > ) ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : IN_PATH
+| < NODE_TYPE_OXPATH : ( < FIELD > | < ANY_FIELD > ) ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : IN_PATH
+| < PERIOD : "." > : IN_PATH_OP
+| < PARENT_SHORT : ".." > : IN_PATH_OP
+| < AT : "@" > : IN_PATH
+| < FUNCTION_NAME : < QNAME > ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : IN_PATH
+//| < NAME_TEST : ( "*" | (< NCNAME > < COLON > "*") | < QNAME > ) > : IN_PATH_OP//NAME_TEST not used as tokens (rather production rule) because TokenManager NFA is too big for Java
+| < VARIABLE : < DOLLAR > <QNAME > > : IN_PATH_OP
+| < END_EXTRACT_MARK : ">" > : IN_PATH
+}
+
+< IN_PATH_OP > TOKEN : /* EXPR TOKEN */
+{
+  < AND : "and" > : IN_PATH| < OR : "or" > : IN_PATH| < MOD : "mod" > : IN_PATH| < DIV : "div" > : IN_PATH| < MULTIPLY : "*" > : IN_PATH//| < DESCENDENT_OR_SELF_SHORT : "/" "/" > : IN_PATH//| < SLASH : "/" > : IN_PATH| < UNION : "|" > : IN_PATH| < PLUS : "+" > : IN_PATH| < MINUS : "-" > : IN_PATH| < LESSTE : "<=" > : IN_PATH| < LESS : "<" > : IN_PATH| < GREATERTE : ">=" > : IN_PATH| < GREATER : ">" > : IN_PATH| < NOTEQUAL : "!=" > : IN_PATH| < EQUALS : "=" > : IN_PATH
+| < PERIOD_OP : "." > : IN_PATH
+| < HASH : "#" >   : IN_PATH
+| < WORD_TEST : "~=" > : IN_PATH
+| < CONTAINS : "#=" > : IN_PATH
+  //  < OPERATOR : ( < AND >//               | < OR >//               | < MOD >//               | < DIV >//               | < MULTIPLY >//               | < DESCENDENT_OR_SELF_SHORT >//               | < SLASH >//               | < UNION >//               | < PLUS >//               | < MINUS >//               | < LESSTE >//               | < LESS >//               | < GREATERTE >//               | < GREATER >//               | < NOTEQUAL >//               | < EQUALS > )> : IN_PATH}
+
+< IN_PATH > TOKEN : /* NODE TYPE */
+{  < PROCESSING_INSTRUCTION : "processing-instruction" >
+| < COMMENT : "comment" >
+| < TEXT : "text" >
+| < NODE : "node" >
+}
+
+< IN_PATH > TOKEN : /* NODE TEST */
+{  < FIELD : "field" >
+| < ANY_FIELD : "any-field" >
+}
+
+< IN_PATH, IN_PATH_OP > TOKEN : /* ACTION KEY WORDS */
+{
+  < WAIT : "wait" ( < SPACE > | < TAB > | < NEWLINE > )* "=" > 
+| < UNTIL : "until" ( < SPACE > | < TAB > | < NEWLINE > )* "=" > 
+}
+
+//< IN_PATH_OP > TOKEN : /* OPERATOR *///{//  < AND : "and" >//| < OR : "or" >//| < MOD : "mod" >//| < DIV : "div" >//| < MULTIPLY : "*" >//| < DESCENDENT_OR_SELF_SHORT : "/" "/" >//| < SLASH : "/" >//| < UNION : "|" >//| < PLUS : "+" >//| < MINUS : "-" >//| < LESSTE : "<=" >//| < LESS : "<" >//| < GREATERTE : ">=" >//| < GREATER : ">" >//| < NOTEQUAL : "!=" > //| < EQUALS : "=" >//}
+
+< IN_PATH > TOKEN : /*VARIABLE*/
+{  < DOLLAR : "$" > : IN_PATH
+}
+
+< IN_PATH > TOKEN : /* NAME_TEST */
+{
+  < WILDCARD : "*" > : IN_PATH_OP
+| < WILDCARD_BOUNDED : (< NCNAME > < COLON > < WILDCARD >) > : IN_PATH_OP
+| < QNAME : < NCNAME > (< COLON > < NCNAME >)? > : IN_PATH_OP
+| < NCNAME : < NAMESTARTCHAR > (< NAMESTARTCHAR > | "-" | ["0"-"9"])* > //period removed to allow for use of CSS class operator
+//| < NCNAME : < NAMESTARTCHAR > (< NAMESTARTCHAR > | "-" | "." | ["0"-"9"])* > 
+| < NAMESTARTCHAR : ["A"-"Z"] | ["a"-"z"] | "_" >
+| < COLON : ":" >
+}
+
+< IN_PATH > TOKEN : /* NUMBER */
+{  < DIGITS : (["0"-"9"])+ >
+}
+
+//< IN_PATH > TOKEN : /* OXPath/XPath AXIS NAME, disguised and made anonymous above to get rid of javacc warnings *///{//  < NEXT_FIELD : "next-field" >//| < FOLLOWING_FIELD : "following-field" >//| < PREVIOUS_FIELD : "previous-field" >//| < PRECEDING_FIELD : "preceding-field" >//  //| < ANCESTOR_OR_SELF : "ancestor-or-self" >//| < ANCESTOR : "ancestor" >//| < ATTRIBUTE : "attribute" >//| < CHILD : "child" >//| < DESCENDENT_OR_SELF : "descendent-or-self" >//| < DESCENDENT : "descendent" >//| < FOLLOWING_SIBLING : "following-sibling" >//| < FOLLOWING : "following" >//| < NAMESPACE : "namespace" >//| < PARENT : "parent" >//| < PRECEDING_SIBLING : "preceding-sibling" >//| < PRECEDING : "preceding" >//| < SELF : "self" >//}
+
+< IN_PATH > MORE :
+{
+< "\"" > : IN_DOUBLE_QUOTE_STRING_PATH
+}
+
+< IN_DOUBLE_QUOTE_STRING_PATH >
+TOKEN :
+{
+< DOUBLE_QUOTE_STRING_PATH : "\"" > : IN_PATH_OP
+}
+
+< IN_DOUBLE_QUOTE_STRING_PATH >
+MORE :
+{
+< ~["\""] >
+}
+
+< IN_PATH > MORE :
+{
+< "'" > : IN_SINGLE_QUOTE_STRING_PATH
+}
+
+< IN_SINGLE_QUOTE_STRING_PATH >
+TOKEN :
+{
+< SINGLE_QUOTE_STRING_PATH : "'" > : IN_PATH_OP
+}
+
+< IN_SINGLE_QUOTE_STRING_PATH >
+MORE :
+{
+< ~["'"] >
+}
+//SimpleNode Start() ://{}//{//  Script()//  {//    return jjtThis;//  }//}
+
+SimpleNode Script() :
+{}
+{
+  ( PathDeclaration() )*
+//  OXPathPathSegment()
+//  Declarations() < XQBLOCK >  XQDeclarations() < EOF >
+  {
+    return jjtThis;
+  }
+}
+
+void Declarations() :
+{}
+{
+  (    DatabaseDeclaration() | URLDeclaration() | VariableDeclaration()
+   )*
+   (PathDeclaration())+
+}
+
+void XQDeclarations() :
+{}
+{
+//  ( CommonAncestorDeclaration() | ScrapeDeclaration() )+
+  ( ScrapeDeclaration() )+
+}
+
+void DatabaseDeclaration() #void:
+{}
+{
+  < DATABASE > DatabaseFileName() < ENDLINE >}
+
+void DatabaseFileName() :
+{String subtree;}
+{//  Letter() ( Letter() | < DIGIT > | < PLUS > | < UNDERSCORE > | < TILDE > )* < DBNAMEEXT >
+	  subtree = XPathLiteral()	  { process(jjtThis,subtree); }
+}
+
+String Letter() :
+{Token t;}
+{ ( t = < UPPER_ALPHA > {return process(jjtThis,t.image);} )
+ | ( t = < LOWER_ALPHA > {return process(jjtThis,t.image);} )
+}
+
+void URLDeclaration() #void:
+{}
+{
+  < URL > URLName() < ENDLINE >
+}
+
+String URLName() :
+{StringBuilder sb = new StringBuilder();
+ String sp;
+ String hp;
+ Token t1;
+ String up;
+ Token t2;
+ String us;}
+{//adapted from w3c BNF grammar for BNF located @ http://www.w3.org/Addressing/URL/5_BNF.html#z18
+  sp = SupportedProtocols() hp = HostPort() {sb.append(sp); sb.append(hp);}
+  [ t1 = < SLASH_URL >  up = URLPath() {sb.append(t1.image); sb.append(up);} ]
+  [ t2 = < QUESTION_URL > us = URLSearch() {sb.append(t2.image); sb.append(us);} ]
+  {return process(jjtThis,sb.toString());}
+//SupportedProtocols() HostPort() [LOOKAHEAD(< SLASH > URLPath()) < SLASH > URLPath() | < SLASH > ] [ < QUESTION_URL > URLSearch() ]
+}
+
+String SupportedProtocols() :
+{Token t;}
+{//current supported protocols of http and https  t = < PROTOCOL >  {return process(jjtThis,t.image);}
+//  < COLON > < DESCENDENT_OR_SELF_SHORT >}
+
+String HostPort() :
+{StringBuilder sb = new StringBuilder();
+ String h;
+ Token t;
+ String p;}
+{  h = Host() {sb.append(h);} [ t = < COLON > p = Port() {sb.append(t.image); sb.append(p);} ]
+  {return process(jjtThis,sb.toString());}
+}
+
+String Host() :
+{String subtree;}
+{  (subtree = HostName() {return process(jjtThis,subtree);} )   | ( subtree = HostNumber() {return process(jjtThis,subtree);}) 
+}
+
+String HostName() :
+{String subtree;}
+{  subtree = URLIAlpha() {return process(jjtThis,subtree);}//[ < PERIOD > HostName() ]}
+
+String URLIAlpha() :
+{StringBuilder st = new StringBuilder();
+ String l;
+ String u;}
+{  l=Letter() {st.append(l);} [ u=URLXAlphas() {st.append(u);} ]
+  {return process(jjtThis,st.toString());}
+}
+
+String URLXAlphas() :
+{StringBuilder sb = new StringBuilder();
+ String u;
+ String us;}
+{ u = URLXAlpha() {sb.append(u);} [ us = URLXAlphas() {sb.append(us);} ]
+ {return process(jjtThis,(sb.toString()));}
+}
+
+String URLXAlpha() :
+{String s;
+ Token t;}
+{	  s=Letter() {return process(jjtThis,s);}
+	| t=< DIGIT > {return process(jjtThis,t.image);}
+	| s=URLSafe() {return process(jjtThis,s);}
+	| s=URLExtra() {return process(jjtThis,s);}
+	| s=URLEscape() {return process(jjtThis,s);}
+}
+
+String URLSafe() :
+{Token t;}
+{  t=< DOLLAR_URL > {return process(jjtThis,t.image);}
+| t=< MINUS_URL > {return process(jjtThis,t.image);}
+| t=< UNDERSCORE_URL > {return process(jjtThis,t.image);}
+| t=< AT_URL > {return process(jjtThis,t.image);}
+| t=< PERIOD_URL > {return process(jjtThis,t.image);}
+| t=< AMPERSAND_URL > {return process(jjtThis,t.image);}
+| t=< PLUS_URL > {return process(jjtThis,t.image);}| t=< EQUALS_URL > {return process(jjtThis,t.image);}//not part of the grammar; in practice, however, <EQUALS_URL> is URL safe  
+}
+String URLExtra() :
+{Token t;}
+{
+  t=< EXCLAIMATION_URL > {return process(jjtThis,t.image);}
+| t=< STAR_URL > {return process(jjtThis,t.image);}
+| t=< QUOTE_URL > {return process(jjtThis,t.image);}
+| t=< APOSTROPHE_URL > {return process(jjtThis,t.image);}
+| t=< OPEN_PARAN_URL > {return process(jjtThis,t.image);}
+| t=< CLOSE_PARAN_URL > {return process(jjtThis,t.image);}
+| t=< COMMA_URL > {return process(jjtThis,t.image);}
+
+}
+
+String URLEscape() :
+{Token t;}
+{
+  t=< PERCENT_URL > {return process(jjtThis,t.image);}
+}
+String HostNumber() :
+{String s1;
+ Token t1;
+ String s2;
+ Token t2;
+ String s3;
+ Token t3;
+ String s4;}
+{  s1=Digits() t1=< PERIOD_URL > s2=Digits() t2=< PERIOD_URL > s3=Digits() t3=< PERIOD_URL > s4=Digits()
+  {StringBuilder sb = new StringBuilder();
+   sb.append(s1);
+   sb.append(t1);
+   sb.append(s2);
+   sb.append(t2);
+   sb.append(s3);
+   sb.append(t3);
+   sb.append(s4);
+   return process(jjtThis,sb.toString());}
+}
+
+String Digits() :
+{Token t;
+ StringBuilder sb = new StringBuilder();}
+{  (    t=< DIGIT > {sb.append(t.image);}
+  )+
+  {return process(jjtThis,sb.toString());}
+}  
+
+String Port() :
+{String s;}{  s=Digits() {process(jjtThis,s); return getValue(jjtThis);}
+}
+
+String URLPath() :
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ Token t;
+ String s2;}
+{
+  [s1=URLSegment() {sb.append(s1);} [ t=< SLASH_URL > s2=URLPath() {sb.append(t.image); sb.append(s2);} ]]
+  {return process(jjtThis,(sb.toString()));}
+//  URLSegment() [< SLASH > URLPath()]
+}
+
+String URLSegment() :
+{String s;}
+{  s=URLXAlphas() {return process(jjtThis,s);}
+}
+
+String URLSearch() :
+{String s;}
+{
+  s=URLXAlphas() {return process(jjtThis,s);}
+  //[ < PLUS > URLSearch() ]
+}
+
+SimpleNode VariableDeclaration() :
+{}
+{
+  VariableName() <EQUALS_DEFAULT > OXPathPathSegment() < ENDLINE >  {return jjtThis;}}
+
+String VariableName() :
+{Token t;}
+{//  < DOLLAR > < LOWER_ALPHA > ( Letter() | < DIGIT > | < UNDERSCORE_URL > )*
+( t=< VARIABLE > {return process(jjtThis,t.image);} )
+| ( t=< VARIABLE_DEFAULT > {return process(jjtThis,t.image);} )
+}
+
+void PathDeclaration() :
+{}
+{
+  < PATH > OXPathPathSegment() < ENDLINE >
+//  ( < PATH > | OXPathURL() ) OXPathPathSegment() < ENDLINE >
+}
+
+//void OXPathURL() #void://{}//{//  < PATH_URL >  URLName()  < END_URL > //}
+
+//void OXPathPathSegmentEntry() ://{Token t1;// String s1;// String s2;// Token t2;// Token t3;// String s3;// StringBuilder sb = new StringBuilder();// }//{//replaces OXPathPathSegment for initial entry//  (//    ( ( t1=< SLASH > s1=RelativeOXPathLocationPath() {sb.append(t1.image); sb.append(s1);})? t2=< END_PATH > {sb.append(t2.image);}) // <END_PATH > Token distributed inside choice so that no empty choice occurs//   | (s1=AbbreviatedAbsoluteOXPathLocationPath() t2=< END_PATH > {sb.append(s1); sb.append(t2.image);})//  )//  s2=OXPathTerminal() {sb.append(s2);}//  ( (t3=< SLASH > {sb.append(t3.image);} (s3=RelativeOXPathLocationPath() {sb.append(s3);})? ) | s3=AbbreviatedAbsoluteOXPathLocationPath() {sb.append(s3);})//  {process(jjtThis,sb.toString());}//}////String OXPathTerminal() ://{StringBuilder sb = new StringBuilder();// String s;// Token t1;// Token t2;// Token t3;}//{//  t1=< XQ > {sb.append(t1.image);} [ t2=< WHILE > s=XPathQName() {sb.append(t2.image); sb.append(s);}] t3=< GREATER > {sb.append(t3.image);}//  {return process(jjtThis,sb.toString());}//}
+
+String OXPathPathSegment() #OXPathPathSegment(>1)://Adapted in part from the grammar in http://www.w3.org/TR/xpath/, adapted to be LL(1)
+{StringBuilder sb = new StringBuilder();
+ String s;
+ Token t;}
+{//don't support relative location paths for start  (s=RelativeOXPathLocationPath() {sb.append(s);}
+| (//    < SLASH >  (LOOKAHEAD(2) RelativeOXPathLocationPath())?
+		      t=< SLASH > {sb.append(t.image);} (s=RelativeOXPathLocationPath() {sb.append(s);} )?
+  )
+|
+  s=AbbreviatedAbsoluteOXPathLocationPath() {sb.append(s);} )
+  {return process(jjtThis,(sb.toString()));}
+//|//  < LESS > < XQ > [ < WHILE > ScraperName()] < GREATER >
+}
+
+String RelativeOXPathLocationPath() :
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ String s2;
+ Token t;
+ String s3;
+ String s4; }
+{
+  s1=OXPathStep() {sb.append(s1);} [s2=OXPathKleeneStar() {sb.append(s2);}]
+  [ (t=< SLASH > {sb.append(t.image);} | s4=DescendantOrSelfShort() {sb.append(s4);} ) s3=RelativeOXPathLocationPath() {sb.append(s3);} ]
+  {return process(jjtThis,sb.toString());}
+}
+
+String DescendantOrSelfShort() :
+{Token t;}
+{  t=< DESCENDENT_OR_SELF_SHORT > {return process(jjtThis,t.image);}
+}
+
+String OXPathKleeneStar() :
+{StringBuilder sb = new StringBuilder();
+ String s3;
+ Token t1;
+ Token t2;
+ Token t3;
+ Token t4;
+ Token t5;
+ String s4;}
+{
+  //Overload the Multiply operator for Kleene star
+  t1=< BEGIN_KLEENE_STAR > s3=OXPathPathSegment() t2=< CLOSE_PARAN > {sb.append(t1.image); sb.append(s3); sb.append(t2.image);}
+  (t3=< MULTIPLY > {sb.append(t3.image);} | 
+  t4=< OPEN_CURLY > s4=OXPathKleeneStarPredicate() t5=< CLOSE_CURLY > {sb.append(t4.image); sb.append(s4); sb.append(t5.image);})
+  {return process(jjtThis,sb.toString());}
+}
+
+String OXPathKleeneStarPredicate() :
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ Token t;
+ String s2;}
+{
+  s1=OXPathKleeneStarPredicateArg() {sb.append(s1);}
+  [ t=<COMMA > {sb.append(t.image);}
+  [ s2=OXPathKleeneStarPredicateArg() {sb.append(s2);} ]]
+  {return process(jjtThis,sb.toString());}}
+
+String OXPathKleeneStarPredicateArg() :
+{Token t;}
+{  t=< DIGITS >  {return process(jjtThis,t.image);}
+}
+
+String OXPathStep() :
+{String s1;
+ String s2;
+ String s3;
+ String s4;
+ StringBuilder sb = new StringBuilder();}
+{(  ( (([ ( s1=XPathAxisSpecifier() | s1=OXPathAxisSpecifier() ) {sb.append(s1);} ]
+   ( s2=XPathNodeTest() | s2=OXPathNodeTest() ) {sb.append(s2);})
+| s1=AbbreviatedStep() {sb.append(s1);})      ( ( s3=OXPathNodeTestOp() | s3=XPathPredicate() | s3=OXPathOptionalPredicate() | s3=OXPathExtractionMarker() ) {sb.append(s3);} )* )
+//| ( s1=OXPathAxisSpecifier() s2=OXPathNodeTest() {sb.append(s1); sb.append(s2);} (s3=OXPathPredicate() {sb.append(s3);} )* )
+| s1=VariableName() {sb.append(s1);}
+| s1=OXPathAction() {sb.append(s1);} )
+//( s4=OXPathExtractionMarker() {sb.append(s4);})?
+{return process(jjtThis,sb.toString());}
+}
+
+String XPathAxisSpecifier() :
+{String s;}{  ( s=XPathForwardAxisName() | s=XPathBackwardAxisName() | s=XPathAbbreviatedAxisSpecifier() )
+  {return process(jjtThis,s);}
+}
+
+String OXPathAxisSpecifier() #OXPathAxisSpecifier(>1):
+{String s;}
+{
+  s=OXPathAxisName() {return process(jjtThis,s);}
+}
+
+String XPathForwardAxisName() :
+{Token t;}
+{  t=< XPATH_FORWARD_AXISNAME > {return process(jjtThis,t.image);}}
+
+String XPathBackwardAxisName() :
+{Token t;}
+{
+  t=< XPATH_BACKWARD_AXISNAME > {return process(jjtThis,t.image);}
+}
+
+String OXPathAxisName() :
+{Token t;}
+{  t=< OXPATH_AXISNAME > {return process(jjtThis,t.image);}
+}
+
+String XPathAbbreviatedAxisSpecifier() :
+{Token t;}
+{  t=< AT > {return process(jjtThis,t.image);}
+}
+
+String XPathNodeTest() :
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ String s2;
+ Token t1;
+ Token t2;}
+{//needs semantic check to make sure xpathliteral parameter only specified for processing-instruction node types  ( s1=XPathNameTest() {return process(jjtThis,s1);}
+  //[s2=OXPathNodeTestOp() {sb.append(s2);}])
+  )
+| ( t1=< NODE_TYPE > {sb.append(t1.image);} ( s1=XPathLiteral() {sb.append(s1);} )? t2=<CLOSE_PARAN >
+  {sb.append(t2.image);} ) {return process(jjtThis,sb.toString());}
+}
+
+String OXPathNodeTest() :
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ Token t1;
+ Token t2;}
+{//needs semantic check to make sure xpathliteral parameter only specified for processing-instruction node types
+//  s1=OXPathNameTest() {return process(jjtThis,s1);} |
+  ( t1=< NODE_TYPE_OXPATH > {sb.append(t1.image);}
+//  ( s1=XPathLiteral() {sb.append(s1);} )?
+  t2=<CLOSE_PARAN > {sb.append(t2.image);} )
+  {return process(jjtThis,sb.toString());}
+}
+
+String OXPathNodeTestOp() :
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ String s;}
+{  s1=OXPathNodeTestOper() {sb.append(s1);} s=XPathQName() {sb.append(s); return process(jjtThis,sb.toString());} 
+}
+
+String OXPathNodeTestOper() :
+{Token t;}
+{  ( t=< PERIOD_OP > | t=< HASH > )
+  {return process(jjtThis,t.image);}
+}
+
+String XPathNameTest() :
+{Token t;
+ String s;}
+{
+  t=< WILDCARD > {return process(jjtThis,t.image);}
+| t=< WILDCARD_BOUNDED > {return process(jjtThis,t.image);}
+| s=XPathQName() {return process(jjtThis,s);}//  < STAR > | ( XPathNCName() < COLON > < STAR > ) | XPathQName()
+//  < WILDCARD > | ( XPathNCName() ( < COLON > < WILDCARD > )? ) | XPathQName()
+//  < NAME_TEST >}
+
+String XPathQName() :
+{Token t;}
+{
+  t=< QNAME > {return process(jjtThis,t.image);}
+}
+//String XPathNCName() ://{Token t;}//{//  t=< NCNAME > {return process(jjtThis,t.image);}//}
+
+//void XPathQName() ://{}//{//  < NCNAME > ( < COLON > < NCNAME > )?//}
+
+//void XPathNodeType() ://{}//{//  < COMMENT > | < TEXT > | < PROCESSING_INSTRUCTION > | < NODE >//}
+
+String XPathLiteral() :
+{Token t;}
+{  ( t = < DOUBLE_QUOTE_STRING_PATH > {return process(jjtThis,t.image);} )  	                                       
+  |
+  ( t = < SINGLE_QUOTE_STRING_PATH > {return process(jjtThis,t.image);} )
+//  {return (String) jjtThis.jjtGetValue();}
+//| < DOUBLE_QUOTE_STRING_XQ > | < SINGLE_QUOTE_STRING_XQ >
+}
+
+//String OXPathNodeTest() #OXPathNodeTest(>1)://{String s;}//{//no semantic meaning to nodetype tests for OXPath additional axes////  XPathNameTest() | ( XPathNodeType() < OPEN_PARAN > ( XPathLiteral() ) ? <CLOSE_PARAN > )//  s=OXPathNameTest() {return process(jjtThis,s);}//}
+
+//String OXPathNameTest() ://{Token t;// String s;}//{////  < WILDCARD > | ( XPathNCName() ( < COLON > ( < WILDCARD > | XPathNCName() ) )? )////< NAME_TEST >//  t=< WILDCARD > {return process(jjtThis,t.image);}//| t=< WILDCARD_BOUNDED > {return process(jjtThis,t.image);}//| s=XPathQName() {return process(jjtThis,s);}//}
+
+//String AnyPredicate() #AnyPredicate(>1)://{StringBuilder sb = new StringBuilder();// Token t1;// String s;// Token t2;}//{//  t1=< OPEN_BRACKET > s=XPathPredicateExpr() t2=< CLOSE_BRACKET >//  {sb.append(t1.image); sb.append(s); sb.append(t2);//  return process(jjtThis,sb.toString());}
+//}
+
+
+String XPathPredicate() :
+{StringBuilder sb = new StringBuilder();
+ Token t1;
+ String s;
+ Token t2;}
+{  t1=< OPEN_BRACKET > s=XPathPredicateExpr() t2=< CLOSE_BRACKET >
+  {sb.append(t1.image); sb.append(s); sb.append(t2);
+   return process(jjtThis,sb.toString());}
+}
+
+String OXPathOptionalPredicate() :
+{StringBuilder sb = new StringBuilder();
+ Token t1;
+ String s;
+ Token t2;}
+{  t1=< OPEN_OPTIONAL > s=XPathPredicateExpr() t2=< CLOSE_BRACKET >
+  {sb.append(t1.image); sb.append(s); sb.append(t2);
+  return process(jjtThis,sb.toString());}
+}
+
+//String OXPathPredicate() ://{StringBuilder sb = new StringBuilder();// Token t1;// String s;// Token t2;}//{////  < OPEN_BRACKET > OXPathPredicateExpr() < CLOSE_BRACKET >//  t1=< OPEN_BRACKET > s=XPathPredicateExpr() t2=< CLOSE_BRACKET >//  {sb.append(t1.image); sb.append(s); sb.append(t2);//   return process(jjtThis,sb.toString());}//}
+
+String XPathPredicateExpr() #XPathPredicateExpr(>1):
+{String s;}
+{  s=XPathExpr() {return process(jjtThis,s);}
+}
+
+String OXPathPredicateExpr() :
+//{Token t;}//  t=< DIGITS > {return process(jjtThis,t.image);}
+{StringBuilder sb = new StringBuilder();
+ Token t1;
+ String s;
+ Token t2;}
+{
+  t1=< OPEN_BRACKET > s=XPathPredicateExpr() t2=< CLOSE_BRACKET >
+  {sb.append(t1.image); sb.append(s); sb.append(t2);
+   return process(jjtThis,sb.toString());}
+}
+
+//String OXPathAction() ://{StringBuilder sb = new StringBuilder();// Token t1;// String s1;// Token t2;// String s2;// Token t3;}//{//  t1=< OPEN_CURLY > {sb.append(t1.image);} (s1=OXPathAttributeDeclaration() t2=< EQUALS > {sb.append(s1); sb.append(t2.image);} )?//  s2=UnGroundedOXPathActionDeclaration() t3=< CLOSE_CURLY > {sb.append(s2); sb.append(t3.image); return process(jjtThis,sb.toString());}//}
+
+String OXPathAction() #OXPathAction(>1):
+{String s;}
+{  ( s=OXPathURLAction() | s=OXPathUserAction())  {return process(jjtThis,s);} 
+}
+
+String OXPathURLAction() ://TODO: Change syntax to doc("url")
+{StringBuilder sb = new StringBuilder();
+ Token t1;
+ String s;
+ Token t2;
+ Token t3;
+ Token t4;
+ String s1;}
+{
+  t1=< BEGIN_URL_IN_PATH > s=URLName() t2= < END_URL_IN_PATH >
+  {
+    sb.append(t1.image);
+    sb.append(s);
+    sb.append(t2.image);  }
+  [s1 = OXPathActionPred() {sb.append(s1);}]
+  t3 = < SLASH > t4 = < CLOSE_CURLY >
+  {    sb.append(t3.image);
+    sb.append(t4.image);
+    return process(jjtThis,sb.toString());
+  }
+| t1=< DOC_BEGIN > s=XPathLiteral() 
+  {
+    sb.append(t1.image);
+    sb.append(s);
+  }
+  [s1 = OXPathActionPred() {sb.append(s1);}]
+  t2=< CLOSE_PARAN >
+  {
+    sb.append(t2.image);
+    return process(jjtThis,sb.toString());
+  }} 
+
+
+String OXPathUserAction() :
+{StringBuilder sb = new StringBuilder();
+ Token t1;
+ String s1;
+ String s2;
+ Token t2;
+ String s3;}
+{
+  t1=< OPEN_CURLY > {sb.append(t1.image);}
+  ( s1=UnGroundedOXPathActionPosition()
+  | s1=GroundedOXPathActionExplicit()
+  | s1=OXPathActionKeyword() ) {sb.append(s1);}
+//  s1=UnGroundedOXPathActionDeclaration() {sb.append(s1);}
+  [ s3 = OXPathActionPred() {sb.append(s3);} ]
+  [ s2=OXPathAbsoluteActionSignal() {sb.append(s2);} ]
+  t2=< CLOSE_CURLY >
+  {sb.append(t2.image); return process(jjtThis,sb.toString());}
+}
+
+String OXPathActionPred() #OXPathActionPred(>1):
+{StringBuilder sb = new StringBuilder();
+ Token t1;
+ String s;
+ Token t2;}
+{  t1=< OPEN_BRACKET > ( s=OXPathActionWaitPred() | s=OXPathActionUntilPred() ) t2=< CLOSE_BRACKET >
+  { sb.append(t1.image);
+    sb.append(s);
+    sb.append(t2.image);
+    return process(jjtThis,sb.toString());}
+}
+
+String OXPathActionWaitPred() :
+{Token t;
+ String s;}
+{  t=< WAIT > s=XPathNumber()
+  {return process(jjtThis,t.image+s);}
+}
+
+String OXPathActionUntilPred() :
+{Token t;
+ String s;}
+{  t=< UNTIL > s=OXPathPathSegment()
+  {return process(jjtThis,t.image+s);}
+}
+
+//String OXPathAttributeDeclaration() ://{Token t;// String s;}//{//  t=< AT > s=XPathQName() {return process(jjtThis,(t.image+s));}//}
+
+String OXPathAbsoluteActionSignal() :
+{  Token t;}{  t=< SLASH > {return process(jjtThis,t.image);}
+}
+
+String UnGroundedOXPathActionDeclaration() :
+{String s;}
+{
+    ( s=UnGroundedOXPathActionPosition() | s=UnGroundedOXPathActionExplicit() | s=UnGroundedOXPathActionVariable() | s=OXPathActionKeyword() )//  ( s=UnGroundedOXPathActionPosition() | s=UnGroundedOXPathActionExplicit() | s=UnGroundedOXPathActionReference() | s=OXPathActionKeyword() )
+  {return process(jjtThis,s);}
+}
+
+String UnGroundedOXPathActionPosition() :
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ Token t;
+ String s2;}
+{  s1=GroundedOXPathActionPosition() {sb.append(s1);}
+  ( t=< COMMA > s2=UnGroundedOXPathActionPosition() {sb.append(t.image); sb.append(s2);} )?
+  {return process(jjtThis,sb.toString());}
+}
+
+String GroundedOXPathActionPosition() :
+{Token t;}
+{  t=< DIGITS > {return process(jjtThis,t.image);}
+}
+
+String UnGroundedOXPathActionExplicit() :
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ Token t;
+ String s2;}
+{  s1=GroundedOXPathActionExplicit() {sb.append(s1);}
+  ( t=< COMMA > s2=UnGroundedOXPathActionExplicit() {sb.append(t.image); sb.append(s2);} )?
+  {return process(jjtThis,sb.toString());}
+}
+
+String GroundedOXPathActionExplicit() :
+{String s;}
+{  s=XPathLiteral() {return process(jjtThis,s);}
+}
+
+String UnGroundedOXPathActionVariable() :
+{Token t;}
+{  t=< VARIABLE >  {return process(jjtThis,t.image);}
+}
+
+//String UnGroundedOXPathActionReference() ://{StringBuilder sb = new StringBuilder();// String s1;// Token t1;// Token t2;// String s2;// Token t3;}//{//NCName includes <PERIOD > token//  (( s1=XPathQName() {sb.append(s1);}//  ( t1=< COMMA > t2=< FUNCTION_NAME > {sb.append(t1.image); sb.append(t2.image);}//  (s2=OXPathActionReferenceDependencyList() {sb.append(s2);} )?//  t3=< CLOSE_PARAN > {sb.append(t3.image);} )?)//| t1=< FUNCTION_NAME > s1=OXPathActionAttributes() t2=< CLOSE_PARAN > {sb.append(t1.image); sb.append(s1); sb.append(t2.image);})//  {return process(jjtThis,sb.toString());}//}////String OXPathActionAttributes() ://{StringBuilder sb = new StringBuilder();// String s1;// Token t;// String s2;}//{//  s1=XPathLiteral() {sb.append(s1);}//  [ t=< COMMA > s2=OXPathActionAttributes() {sb.append(t.image); sb.append(s2);}]//  {return process(jjtThis,sb.toString());}//}////String OXPathActionReferenceDependencyList() ://{StringBuilder sb = new StringBuilder();// String s1;// Token t;// String s2;}//{//  s1=OXPathActionReferenceDependency() {sb.append(s1);}//  [ t=< COMMA > s2=OXPathActionReferenceDependencyList() {sb.append(t.image); sb.append(s2);} ]//  {return process(jjtThis,sb.toString());}//}////String OXPathActionReferenceDependency() ://{String s;}//{//  s=XPathQName() {return process(jjtThis,s);}//}
+
+String OXPathActionKeyword() :
+{Token t;}
+{
+(  t=< FOCUS >
+| t=< CLICK >
+| t=< DBLCLICK >
+| t=< MOUSEDOWN >
+| t=< MOUSEENTER >
+| t=< MOUSEMOVE >
+| t=< MOUSEOVER >
+| t=< MOUSEOUT >
+| t=< MOUSEUP >
+| t=< WHEEL >
+| t=< SUBMIT >
+| t=< UNCLICK >
+| t=< CHECK >
+| t=< UNCHECK > )//  (t=< CLICK > | t=< SUBMIT > | t=< UNCLICK > | t= < CHECK > | t=< UNCHECK >)
+  {return process(jjtThis,t.image);}}
+
+String OXPathExtractionMarker() :
+{StringBuilder sb = new StringBuilder();
+ Token t1;
+ String s1;
+ Token t2;
+ String s2;
+ Token t3;}
+{
+  t1=< BEGIN_EXTRACT_MARK > {sb.append(t1.image);}
+  s1=OXPathExtractionName() {sb.append(s1);}
+  (t2=< EQUALS > s2=OXPathExtractionValue() {sb.append(t2.image); sb.append(s2);})?
+  (t3=< END_EXTRACT_MARK > | t3=< GREATER >) {sb.append(t3.image);}//We overload ">" so we don't have to overly generalize the greater operator
+  {return process(jjtThis,sb.toString());}}
+
+String OXPathExtractionName() :
+{Token t;}
+{  t=< QNAME > {return process(jjtThis,t.image);}
+}
+
+String OXPathExtractionValue() #OXPathExtractionValue(>1):
+{String s;}
+{  s=XPathPrimaryExpr() {return process(jjtThis,s);}
+}
+
+String XPathExpr() #XPathExpr(>1):
+{String s;}
+{  s=XPathOrExpr() {return process(jjtThis,s);}
+}
+
+String XPathOrExpr() #XPathOrExpr(>1):
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ Token t;
+ String s2;}
+{  s1=XPathAndExpr() {sb.append(s1);} ( t=< OR > s2=XPathOrExpr() {sb.append(t.image); sb.append(s2);} )?
+  {return process(jjtThis,sb.toString());}}
+
+String XPathAndExpr() #XPathAndExpr(>1):
+{StringBuilder sb = new StringBuilder();
+String s1;
+Token t;
+String s2;}
+{
+  s1=XPathEqualityExpr() {sb.append(s1);} ( t=< AND > s2=XPathAndExpr() {sb.append(t.image); sb.append(s2);} )?
+  {return process(jjtThis,sb.toString());}
+}
+
+String XPathEqualityExpr() #XPathEqualityExpr(>1):
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ String s;
+ String s2;}
+{  s1=XPathRelationalExpr() {sb.append(s1);}
+  (  s=XPathEqualityExprOp() {sb.append(s);}
+     s2=XPathEqualityExpr() {sb.append(s2);} )?
+  {return process(jjtThis,sb.toString());}
+}
+
+String XPathEqualityExprOp() :
+{Token t;}
+{  ( t=< EQUALS > | t=< NOTEQUAL > | t=< WORD_TEST > | t=< CONTAINS >)
+  {return process(jjtThis,t.image);}
+}
+
+String XPathRelationalExpr() #XPathRelationalExpr(>1):
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ String s;
+ String s2;}
+{//here, right-associative, rather than left-associative in XPath standard  s1=XPathAdditiveExpr() {sb.append(s1);}
+  ( s=XPathRelationalExprOp() {sb.append(s);}
+    s2=XPathRelationalExpr() {sb.append(s2);} )?
+  {return process(jjtThis,sb.toString());}
+}
+
+String XPathRelationalExprOp() :
+{Token t;}
+{  ( t=< GREATER >  | t=< LESS > | t=< GREATERTE > | t=< LESSTE > )
+  {return process(jjtThis,t.image);}
+}
+String XPathAdditiveExpr() #XPathAdditiveExpr(>1):
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ String s;
+ String s2;}
+{  s1=XPathMultiplicativeExpr() {sb.append(s1);}
+  (  s=XPathAdditiveExprOp() {sb.append(s);}
+     s2=XPathAdditiveExpr() {sb.append(s2);} )?
+  {return process(jjtThis,sb.toString());}}
+
+String XPathAdditiveExprOp() :
+{Token t;}
+{  (t=< PLUS >  | t=< MINUS > )
+  {return process(jjtThis,t.image);}
+}
+
+String XPathMultiplicativeExpr() #XPathMultiplicativeExpr(>1):
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ String s;
+ String s2;}
+{  s1=XPathUnaryExpr() {sb.append(s1);}
+  ( s=XPathMultiplicativeOp() {sb.append(s);}
+    s2=XPathMultiplicativeExpr() {sb.append(s2);} )?
+  {return process(jjtThis,sb.toString());}
+}
+
+String XPathMultiplicativeOp() :
+{Token t;}
+{  ( t=< MULTIPLY > | t=< DIV > | t=< MOD > )
+  {return process(jjtThis,t.image);}
+}
+
+String XPathUnaryExpr() #XPathUnaryExpr(>1):
+{StringBuilder sb = new StringBuilder();
+ String s;
+ String s1;}
+{  ( s1=XPathUnaryExprOp() {sb.append(s1);} )* s=XPathUnionExpr() {sb.append(s);}
+  {return process(jjtThis,sb.toString());}
+}
+
+String XPathUnaryExprOp() :
+{Token t;}
+{  t=< MINUS > {return process(jjtThis,t.image);}
+}
+String XPathPrimaryExpr() #XPathPrimaryExpr(>1):
+{StringBuilder sb = new StringBuilder();
+ Token t1;
+ String s;
+ Token t2;}
+{( ( t1=< OPEN_PARAN > s=XPathExpr() t2=< CLOSE_PARAN > {sb.append(t1.image); sb.append(s); sb.append(t2.image);} )
+| s=XPathLiteral() {sb.append(s);}
+| s=XPathNumber() {sb.append(s);}
+| s=XPathFunctionCall() {sb.append(s);} )
+{return process(jjtThis,sb.toString());}
+}
+
+String XPathNumber() :
+{Token t;}
+{  t=< NUMBER > {return process(jjtThis,t.image);}
+| t=< DIGITS > {return process(jjtThis,t.image);}
+}
+
+String XPathFunctionCall() :
+{StringBuilder sb = new StringBuilder();
+ String s3;
+ String s1;
+ Token t2;
+ String s2;
+ Token t3;}
+{  s3=XPathFunctionCallName() {sb.append(s3);}
+  ( s1=XPathArgument() {sb.append(s1);} ( t2=< COMMA > s2=XPathArgument() {sb.append(t2.image); sb.append(s2);} )* )? t3=< CLOSE_PARAN > {sb.append(t3.image);}
+  {return process(jjtThis,sb.toString());}}
+
+String XPathFunctionCallName() :
+{Token t;}
+{  t=< FUNCTION_NAME >
+  {return process(jjtThis,t.image);}
+}
+
+String XPathArgument() #XPathArgument(>1):
+{String s;}
+{  s=XPathExpr() {return process(jjtThis,s);}
+}
+
+String XPathUnionExpr() #XPathUnionExpr(>1):
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ Token t;
+ String s2;}
+{  s1=XPathPathExpr() {sb.append(s1);} ( t=< UNION > s2=XPathUnionExpr() {sb.append(t.image); sb.append(s2);} )?
+  {return process(jjtThis,sb.toString());}
+}
+
+String XPathPathExpr() #XPathPathExpr(>1):
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ Token t;
+ String s2;
+ String s3;}
+{  s1=OXPathPathSegment() {return process(jjtThis,s1);}
+| s1=XPathFilterExpr() {sb.append(s1);} ( ( t=< SLASH > {sb.append(t.image);} | s3=DescendantOrSelfShort() {sb.append(s3);})
+                                          s2=RelativeOXPathLocationPath() {sb.append(s2);} )?
+  {return process(jjtThis,sb.toString());}
+}
+String XPathFilterExpr() #XPathFilterExpr(>1):
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ String s2;}
+{  s1=XPathPrimaryExpr() {sb.append(s1);} ( s2=XPathPredicate() {sb.append(s2);} )*
+  {return process(jjtThis,sb.toString());}}
+String AbbreviatedAbsoluteOXPathLocationPath() :
+{String s1;
+ String s;}
+{  s1=DescendantOrSelfShort() s=RelativeOXPathLocationPath()  {return process(jjtThis,(s1+s));}
+}
+
+//void AbbreviatedRelativeOXPathLocationPath() ://{}//{//here, w3c grammar says second non-terminal is step, meaning only last step is DESCENDENT-OR-SELF abbreviation; change//  OXPathStep() < DESCENDENT_OR_SELF_SHORT > RelativeOXPathLocationPath()//}
+
+String AbbreviatedStep() :
+{Token t;}
+{  t=< PERIOD > {return process(jjtThis,t.image);}
+| t=< PARENT_SHORT > {return process(jjtThis,t.image);}
+}
+
+//void CommonAncestorDeclaration() ://{}//{//  < COMMONANCESTOR > < EQUALS > ScraperPath() < ENDLINE_XQ >//}
+
+void ScrapeDeclaration() :
+{}
+{
+  ScraperName() <EQUALS_DEFAULT > ScraperPath() < ENDLINE >}
+
+void ScraperName() :
+{Token t;}
+{
+  t=< QNAME_DEFAULT > {process(jjtThis,t.image);}
+}
+
+void ScraperPath() #ScraperPath(>1):
+{String s;}
+{  s=XPathUnionExpr() {process(jjtThis,s);}
+}

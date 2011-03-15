@@ -1,0 +1,6 @@
+package uk.ac.ox.comlab.oxpath.benchmark;
+
+public interface BenchMarker {
+    public void start();
+    public void finish();
+}

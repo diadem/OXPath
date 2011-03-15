@@ -1,0 +1,7 @@
+package uk.ac.ox.comlab.oxpath.oxpathTreeWalker;
+
+import junit.framework.TestCase;
+
+public class TreeWalkerTest extends TestCase {
+	
+}

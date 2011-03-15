@@ -1,0 +1,26 @@
+package uk.ac.ox.comlab.oxpath.benchmark;
+
+
+public class BenchFactory {
+    private BenchFactory() {
+	// TODO Auto-generated constructor stub
+    }
+    
+    public static BenchMarker newBenchMarker(String name) {
+	    return new BenchMarker() {
+	        
+	        @Override
+	        public void start() {
+	    	// TODO Auto-generated method stub
+	    	
+	        }
+	        
+	        @Override
+	        public void finish() {
+	    	// TODO Auto-generated method stub
+	    	
+	        }
+	    };
+	}
+
+}

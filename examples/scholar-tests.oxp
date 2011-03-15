@@ -1,0 +1,1 @@
+path={<http://scholar.google.com>/}//field()[1]/{"world wide web"}/following::field()[1]/{click/}/(//a[contains(string(.),'Next')]/{click/}){0,2}//div.gs_r:<paper>[.//h3:<title=string(.)>][.//*.gs_a:<authors=substring-before(.,' - ')>][.//a[.#='Cited by']:<citations>[{click /}//div.gs_r:<citation>[.//h3:<title=string(.)>]]];

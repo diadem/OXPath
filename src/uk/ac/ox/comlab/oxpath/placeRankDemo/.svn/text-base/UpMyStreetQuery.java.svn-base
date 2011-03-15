@@ -1,0 +1,58 @@
+/**
+ * 
+ */
+package uk.ac.ox.comlab.oxpath.placeRankDemo;
+
+/**
+ * @author AndrewJSel
+ *
+ */
+public class UpMyStreetQuery implements SiteQuery {
+
+	/**
+	 * Basic Constructor for UpMyStreet Queries
+	 * @param income 
+	 * @param education
+	 * @param housing
+	 * @param children
+	 */
+	public UpMyStreetQuery(boolean income, boolean education, boolean housing, boolean children) {
+		this.hasIncome = income;
+		this.hasEducation = education;
+		this.hasHousing = housing;
+		this.hasChildren = children;
+	}
+	
+	/* (non-Javadoc)
+	 * @see uk.ac.ox.comlab.oxpath.placeRankDemo.SiteQuery#getOXPath(java.lang.String)
+	 */
+	/**
+	 * Returns OXPath expression formed from implicit parameter
+	 * @param postcode postcode for query
+	 * @return OXPath expression created by object
+	 */
+	@Override
+	public String getOXPath(String postcode) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("path={<http://www.upmystreet.com>/}/descendant::field()[1]/{\"OX1\"}/following::field()[1]/{click/}//*[@id#='neighbourhoodProfile']:<profile>");
+		if (hasIncome) {
+			sb.append("[*[.#='Family income']/following::*[1]:<income=string(.)>]");
+		}
+		if (hasEducation) {
+			sb.append("[*[.#='Educated']/following::*[1]:<education=string(.)>]");
+		}
+		if (hasHousing) {
+			sb.append("[*[.#='Housing']/following::*[1]:<housing=string(.)>]");
+		}
+		if (hasChildren) {
+			sb.append("[*[.#='children']/following::*[1]:<children=string(.)>]");
+		}
+		return sb.toString();
+	}
+
+	//instance fields
+	private boolean hasIncome;
+	private boolean hasEducation;
+	private boolean hasHousing;
+	private boolean hasChildren;
+}

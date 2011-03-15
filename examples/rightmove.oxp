@@ -1,0 +1,1 @@
+path={<http://www.rightmove.co.uk>/}/descendant::field()[1]/{"OX12RG"}/following::input#rent/{click/}//select#minBedrooms/{"1"/}//select#maxPrice/{"PCM3000"/}//input[@id='submit']/{click/}/(//a[.#='next']/{click/})*//ol#summaries/li[descendant::a[.#='More details']/{click/}//div#propertydetails[.#='Furnished']]:<property=(.)>;

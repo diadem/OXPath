@@ -1,0 +1,37 @@
+package uk.ac.ox.comlab.oxpath;
+
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.util.Scanner;
+
+/**
+ * Class with <tt>main<tt> procedure
+ * @author AndrewJSel
+ *
+ */
+public class EqualTokenizerTester {
+
+	/**
+	 * tests output of EqualTokenizer object
+	 * @param args not used
+	 */
+	public static void main(String[] args) {
+		try {
+			FileReader reader = new FileReader("test.xpr");
+			Scanner lineReader = new Scanner(reader);
+			while (lineReader.hasNextLine()) {
+				String s = lineReader.nextLine();
+				EqualTokenizer tokenMaker = new EqualTokenizer(s);
+				System.out.print(tokenMaker.toString());
+				System.out.println(tokenMaker.getArgument());
+				System.out.println(tokenMaker.getValue());
+			}
+			
+			lineReader.close();
+		}
+		catch (FileNotFoundException exception) {
+			System.out.println("File Not Found!");
+		}
+	}
+
+}

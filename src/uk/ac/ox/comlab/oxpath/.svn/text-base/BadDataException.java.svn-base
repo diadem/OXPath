@@ -1,0 +1,29 @@
+/**
+ * 
+ */
+package uk.ac.ox.comlab.oxpath;
+
+/**
+ * class describing exception thrown if user-supplied OXPath script contains errors/is missing data
+ * @author AndrewJSel
+ */
+public class BadDataException extends Exception {
+	/**
+	 * basic constructor of exception
+	 */
+	public BadDataException() {
+		super();
+	}
+	
+	/**
+	 * constructor allowing message, retrieved with Throwable.getMessage
+	 * @param message message to pass along with BadDataException object
+	 */
+	public BadDataException(String message) {
+		super(message);
+		this.printStackTrace();
+	}
+	
+	//boilerplate for serialize interface
+	private static final long serialVersionUID = 1L;
+}

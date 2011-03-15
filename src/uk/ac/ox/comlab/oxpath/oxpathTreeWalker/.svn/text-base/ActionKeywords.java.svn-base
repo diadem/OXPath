@@ -1,0 +1,112 @@
+package uk.ac.ox.comlab.oxpath.oxpathTreeWalker;
+
+/**
+ * Enum encoding action keywords
+ * @author AndrewJSel
+ *
+ */
+public enum ActionKeywords {
+	/**
+	 * <tt>click</tt> event
+	 */
+	CLICK("click"),
+	
+	/**
+	 * <tt>dblclick</tt> event
+	 */
+	DBLCLICK("dblclick"),
+	
+	/**
+	 * <tt>keydown</tt> event
+	 */
+	KEYDOWN("keydown"),
+	
+	/**
+	 * <tt>keypress</tt> event
+	 */
+	KEYPRESS("keypress"),
+	
+	/**
+	 * <tt>keyup</tt> event
+	 */
+	KEYUP("keyup"),
+	
+	/**
+	 * <tt>mousedown</tt> event
+	 */
+	MOUSEDOWN("mousedown"),
+	
+	/**
+	 * <tt>mousemove</tt> event
+	 */
+	MOUSEMOVE("mousemove"), 
+	
+	/**
+	 * <tt>mouseover</tt> event
+	 */
+	MOUSEOVER("mouseover"), 
+	
+	/**
+	 * <tt>mouseout</tt> event
+	 */
+	MOUSEOUT("mouseout"), 
+	
+	/**
+	 * <tt>mouseup</tt> event
+	 */
+	MOUSEUP("mouseup"), 
+	
+	/**
+	 * <tt>rightclick</tt> event
+	 */
+	RIGHTCLICK("rightclick"),
+	
+	/**
+	 * <tt>check</tt> event
+	 */
+	CHECK("check"), 
+	
+	/**
+	 * <tt>uncheck</tt> event
+	 */
+	UNCHECK("uncheck"),
+	
+	/**
+	 * <tt>submit</tt> event
+	 */
+	SUBMIT("submit"),
+	
+	/**
+	 * <tt>wheel</tt> event
+	 */
+	WHEEL("wheel");
+	
+	/**
+	 * only constructor for ActionKeywords
+	 * @param iValue value attribute of enum instance
+	 */
+	private ActionKeywords(String iValue) {this.value=iValue;}
+	
+	/**
+	 * returns value for implicit parameter
+	 * @return value encoded as String object
+	 */
+	public String getValue() {return this.value;}
+	
+	/**
+	 * static method for selecting one of the ActionKeywords objects based on its value
+	 * @param key String value for the ActionKeywords instance
+	 * @return object based on key
+	 */
+	public static ActionKeywords getActionKeyword(String key) {
+		for (ActionKeywords i : ActionKeywords.values()) {
+			if (key.equals(i.getValue())) return i;
+		}
+		return null;//don't need to check this more carefully, as the parser does this for us
+	}
+	
+	/**
+	 * instance field for storing value of the enum object
+	 */
+	private String value;
+}

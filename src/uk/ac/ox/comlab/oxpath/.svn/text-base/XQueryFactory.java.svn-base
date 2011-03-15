@@ -1,0 +1,68 @@
+/**
+ * 
+ */
+package uk.ac.ox.comlab.oxpath;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Abstract class that provides objects, methods, and constants for XQuerys, which in turn support the info scraping function of the OXPath framework.
+ * Specific objects will support either scrapping or next link query types in current implementation
+ * @author AndrewJSel
+ *
+ */
+public abstract class XQueryFactory {
+	
+	/**
+	 * Constructor for Scraper objects; populates with state information for facilitating web scraping
+	 */
+	public XQueryFactory() {
+		//create the boilerplate namespace by declaring the namespace; getDeclaresString() is populated based on the declares mapping
+		declares.put(NAMESPACE,XHTMLNAMESPACEPREAMBLE);//add namespace
+		boilerPlate = this.getDeclaresString();
+		declares.remove(NAMESPACE);
+	}
+	
+	/**
+	 * **INTERNAL API - DO NOT USE** method for constructing the declares part of an XQuery
+	 * @return segment of XQuery with declares information
+	 */
+	private String getDeclaresString() {
+		String rv = "";
+		Set<String> keys = this.declares.keySet();
+		for (String key : keys) {
+			rv += ("declare " + key + " " + this.declares.get(key) + ";\n");//declare field formatting 
+		}
+		return rv;
+	}
+	
+	/**
+	 * getter method that returns boilerplate for SAXON expressions (currently namespace declaration for XHTML)
+	 * @return the boilerplate String to be used at the beginning of any SAXON expressions for OXPath (append queries after this return value)
+	 */
+	public String getBoilerPlate() {
+		return this.boilerPlate;
+	}
+
+	/**
+	 * private instance field for holding the declared values of the query
+	 */
+	private Map<String,String> declares = new HashMap<String,String>();
+	
+	/**
+	 * constant holding the namespace declaration
+	 */
+	static final String NAMESPACE = "namespace";
+	
+	/**
+	 * constant referencing path info for the XHTML namespace
+	 */
+	static final String XHTMLNAMESPACEPREAMBLE = "xhtml=\"http://www.w3.org/1999/xhtml\"";
+	
+	/**
+	 * String holding the boilerplate portion of an XQuery
+	 */
+	private String boilerPlate;
+}

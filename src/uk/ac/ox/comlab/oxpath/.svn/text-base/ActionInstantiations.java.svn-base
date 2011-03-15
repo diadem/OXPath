@@ -1,0 +1,26 @@
+/**
+ * 
+ */
+package uk.ac.ox.comlab.oxpath;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Class whose Objects serve as appropriate data structure for capturing actions for grounded 
+ * @author AndrewJSel
+ */
+public class ActionInstantiations {
+
+	
+	private ArrayList<ActionInstantiation> valuesList = new ArrayList<ActionInstantiation>();
+	
+	public class ActionInstantiation {
+		
+		
+		Map<Set,ArrayList> map = new HashMap<Set,ArrayList>();
+	}
+	
+}

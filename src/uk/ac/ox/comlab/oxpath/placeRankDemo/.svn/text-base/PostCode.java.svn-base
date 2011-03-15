@@ -1,0 +1,90 @@
+/**
+ * 
+ */
+package uk.ac.ox.comlab.oxpath.placeRankDemo;
+
+import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Class for holding post code information
+ * @author AndrewJSel
+ *
+ */
+public class PostCode {
+	
+	public PostCode(String in) throws IOException {
+		String temp = in.trim();
+		if (!temp.contains("GIR 0AA") || !temp.contains("GIR0AA")) {//only postcode that doesn't adhere to regex below
+			Pattern postcode = Pattern.compile("[a-zA-Z][a-zA-Z]?\\d(\\d|[a-zA-Z])?[ ]?\\d[a-zA-Z][a-zA-Z]");
+			Matcher match = postcode.matcher(temp);
+			boolean valid = match.matches();
+			if (!valid) throw new IOException(temp + " is not a valid postcode!");
+		}
+		if (temp.charAt(temp.length()-4)==' ') this.postcode=temp;//if space is there, pass on; if not, add it
+		else this.postcode = temp.substring(0, temp.length()-3) + " " + temp.substring(temp.length()-3);	
+	}
+	
+	/**
+	 * Returns postcode (identical to toString() method)
+	 * @return postcode as <tt>String</tt> object
+	 */
+	public String getPostCode() {
+		return postcode;
+	}
+	
+	/**
+	 * Simply prints postcode
+	 * @return postcode as <tt>String</tt> object
+	 */
+	@Override
+	public String toString() {
+		return this.postcode;
+	}
+
+	
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((postcode == null) ? 0 : postcode.hashCode());
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof PostCode)) {
+			return false;
+		}
+		PostCode other = (PostCode) obj;
+		if (postcode == null) {
+			if (other.postcode != null) {
+				return false;
+			}
+		} else if (!postcode.equals(other.postcode)) {
+			return false;
+		}
+		return true;
+	}
+	
+
+	/**
+	 * Instance field for postcode
+	 */
+	private String postcode;
+}

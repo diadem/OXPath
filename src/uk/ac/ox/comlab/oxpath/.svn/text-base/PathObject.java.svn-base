@@ -1,0 +1,65 @@
+/**
+ * 
+ */
+package uk.ac.ox.comlab.oxpath;
+
+import uk.ac.ox.comlab.oxpath.scriptParser.SimpleNode;
+
+/**
+ * Simple class for associating path AST with their respective URLs
+ * @author AndrewJSel
+ */
+public class PathObject {
+	
+	/**
+	 * Basic Constructor for PathObject
+	 * @param aPathUrl url as String
+	 * @param aPathAST root node of Path Abstract Syntax Tree
+	 */
+	public PathObject(String aPathUrl, SimpleNode aPathAST) {
+		this.setPathURL(aPathUrl);
+		this.setPathAST(aPathAST);
+	}
+	
+	/**
+	 * Basic setter for associating url's with PathObjects
+	 * @param aPathUrl path URL
+	 */
+	public void setPathURL(String aPathUrl) {
+		this.pathUrl = aPathUrl;
+	}
+	
+	/**
+	 * Basic getter for url's with PathObjects
+	 * @return path URL for implicit parameter
+	 */
+	public String getPathURL() {
+		return pathUrl;
+	}
+	
+	/**
+	 * Basic setter for associating paths with PathObjects
+	 * @param aPathAST root of the Abstract Syntax Tree for the path
+	 */
+	public void setPathAST(SimpleNode aPathAST) {
+		this.pathAST=aPathAST;
+	}
+	
+	/**
+	 * Basic getter for paths with PathObjects
+	 * @return path Abstract Syntax Tree for the PathObjects
+	 */
+	public SimpleNode getPathAST() {
+		return pathAST;//returning mutable field, fix before eventual release
+	}
+	
+	/**
+	 * private field encoding path URL state info
+	 */
+	private String pathUrl;
+	
+	/**
+	 * private field encoding path Abstract Syntax Tree
+	 */
+	private SimpleNode pathAST;
+}

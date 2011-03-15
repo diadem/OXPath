@@ -1,0 +1,35 @@
+/**
+ * 
+ */
+package uk.ac.ox.comlab.oxpath;
+
+/**
+ * Enum that defines all the additional OXPath axes 
+ * @author AndrewJSel
+ *
+ */
+public enum AdditionalAxes {
+	/**
+	 * Types of FieldTypes enum values
+	 */
+	NEXTFIELD("next-field::"), PREVIOUSFIELD("previous-field::"), FOLLOWINGFIELD("following-field::"), PRECEDINGFIELD("preceding-field::");
+	
+	/**
+	 * Constructor for initializing each enum value
+	 * @param aValue name (value) for the additional axis 
+	 */
+	AdditionalAxes(String aValue) { 
+		value = aValue;
+	}
+	
+	/**
+	 * public method that returns the value of the implicit additional axis 
+	 * @return value of the implicit additional axis
+	 */
+	public String getValue() {
+		return value;
+	}
+	
+	//instance field storing the value of the additional axis
+	private String value;
+}

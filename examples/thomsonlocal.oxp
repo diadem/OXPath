@@ -1,0 +1,1 @@
+path={<http://www.thomsonlocal.com/>/}/descendant::field()[1]/{"Ice Skating"}/following::field()[1]/{"OX12RG"}/following::field()[1]/{click/}/descendant::*[.#='Showing 1'][last()]:<numResults=(.)>;

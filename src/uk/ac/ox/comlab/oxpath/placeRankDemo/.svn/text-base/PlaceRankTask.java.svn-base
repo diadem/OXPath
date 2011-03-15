@@ -1,0 +1,26 @@
+/**
+ * 
+ */
+package uk.ac.ox.comlab.oxpath.placeRankDemo;
+
+import java.util.ArrayList;
+
+/**
+ * Main class for PlaceRankTask objects
+ * @author AndrewJSel
+ *
+ */
+public class PlaceRankTask {
+
+	
+	//state info
+	/**
+	 * Instance field holding list of postcodes
+	 */
+	ArrayList<PostCode> postcodes = new ArrayList<PostCode>();
+	
+	/**
+	 * Instance field holding list of SiteQuery
+	 */
+	ArrayList<SiteQuery> sitequeries = new ArrayList<SiteQuery>();
+}

@@ -1,0 +1,51 @@
+/**
+ * 
+ */
+package uk.ac.ox.comlab.oxpath;
+
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Properties;
+
+
+/**
+ * when a database is used, these methods help process the queries
+ * @author AndrewJSel
+ *
+ */
+public class DatabaseHelper {
+	
+	/**
+	 * creates new DatabaseHelper instance
+	 */
+	public DatabaseHelper() {}
+	
+	/**
+	 * used to input database data, establish connection, and 
+	 * @param inputFile name of file containing database (formatted for Properties class)
+	 * @return connection to the database
+	 */
+	public Connection getNewConnection(String inputFile) throws IOException, ClassNotFoundException, SQLException {
+		//load the input file into a Properties object for processing
+		Properties pr = new Properties();
+		FileReader in = new FileReader(inputFile);
+		pr.load(in);
+		
+		//get the desired properties
+		String driver = pr.getProperty("jdbc.driver");
+		String url = pr.getProperty("jdbc.url");
+		String username = pr.getProperty("jdbc.username");
+		String password = pr.getProperty("jdbc.password");
+		if (driver != null) Class.forName(driver);
+		if (username == null) username="";
+		if (password == null) password="";
+		
+		//establish a connection
+		return DriverManager.getConnection(url, username, password);
+		
+	}
+
+}

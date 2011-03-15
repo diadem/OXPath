@@ -1,0 +1,48 @@
+----
+OXPath 0.9
+15 Mar 2011
+Copyright (c)2011, DIADEM Project
+All rights reserved.
+-----
+
+-----
+RELEASE NOTES
+-----
+Thank you for using OXPath!  We hope that you enjoy it.
+
+This is a prototype of academic software described in the publications at 
+diadem-project.info/oxpath.  The tool itself is currently released as a .jar 
+file and will require Java to run.  It requires, as dependencies, the other 
+.jar files found in the /lib folder.  The source is also attached, but please 
+know for now that we have a lot of refactoring and refinement ahead and the 
+prototype source is very much a work in progress.
+
+The /apidocs folder contains the javadoc output of the source.  The main class 
+is uk.ac.ox.comlab.oxpath.oxpathTreeWalker.TreeWalker and contains the 
+principal parts of the API.  If one just wants to use OXPath then, they will 
+never really need more than the static methods 
+TreeWalker.evaluateOXPathQuery(filename) and 
+TreeWalker.evaluateOXPathQueryByString(string).  The first method takes as a 
+single parameter filename.  The file, should be formatted so as to 
+satisfy a regular expression denoted by ("path="<OXPath>";")+ where <OXPath> is 
+an OXPath expression.  In this way, multiple OXPath expressions can be specified 
+in the same file and be evaluated serially by the tool. Some examples can be 
+found in /examples.  Details about the language itself can be found in the 
+publications at diadem-project.info/oxpath.
+
+In case one is using single and double quotes inside a URL, the prototype allows 
+page retrievals to be modeled as absolute actions, delimited by <> so that the 
+action is {<URI>/} where URI is the intended uri to visit.  This action can be 
+thought of as a unary function semantically equivalent to the unary doc(uri) 
+function in the OXPath papers.  Also, the prototype currently requires protocol 
+specification in the uri (e.g. http://).
+
+Currently, we use an internal API to HtmlUnit for computing the rendered CSS 
+properties.  While field() (which depends on the style axis) works well, other 
+computed style attributes take only as input the Rhino-standard encodings (for 
+example, color properties are computed as "rgb(119, 119, 199)" rather than 
+"#777777").  FYI for using the style axis, our web browsing environment 
+simulates Firefox 3 and uses the HtmlUnit standard window size (1256X605 pixels).
+
+If you have any feedback (e.g. comments, bugs), please send to 
+oxpath@diadem-project.info. 

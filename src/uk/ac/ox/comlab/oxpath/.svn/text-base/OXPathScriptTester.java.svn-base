@@ -1,0 +1,51 @@
+/**Package used for OXPath, an automated framework for retrieving Deep Web Content using a commodity computing environment
+ * 
+ */
+package uk.ac.ox.comlab.oxpath;
+
+import uk.ac.ox.comlab.oxpath.scriptParser.Node;
+import uk.ac.ox.comlab.oxpath.scriptParser.OXPathScripter;
+import uk.ac.ox.comlab.oxpath.scriptParser.SimpleNode;
+
+
+
+/**
+* Class used for testing framework
+* 
+* @author AndrewJSel
+* 
+*/
+public class OXPathScriptTester {
+
+	public static void main(String[] args) throws Exception {
+		try {
+//			SimpleNode root = OXPathScripter.getJJTree("test1.oxp");
+//			UnGroundedOXPathExpression testUngExp = new UnGroundedOXPathExpression(root);
+//			System.out.println(testUngExp);
+			System.out.println(new Double(4.0).equals(new Double(4)));
+//			test.dump("");
+//			OXPathScripter.dump(test, "");
+//			System.out.println(test.toString());
+//			test=OXPathScripter.getChildByName(test, "Declarations");
+//			System.out.println(OXPathScripter.hasChildByName(test, "aDeclarations"));
+//			System.out.println(OXPathScripter.hasChildByName(test, "DatabaseFileName"));
+//			System.out.println(test);
+//			test = (SimpleNode) test.jjtGetChild(0);//Start -> Script
+//			test = (SimpleNode) test.jjtGetChild(0);//Script -> Declarations
+//			test = (SimpleNode) test.jjtGetChild(1);//Declarations -> DatabaseDeclaration
+////			test = (SimpleNode) test.jjtGetChild(0);//DatabaseDeclaration -> DatabaaseFileName
+//			test.dump("");
+//			System.out.println(test.toString());
+//			System.out.println(test.jjtGetValue());
+		}
+	     catch (Exception e)
+	     {
+	    	 System.out.println("Oops.");
+	    	 System.out.println(e.getMessage());
+		     e.printStackTrace();
+    }
+	}
+	
+	
+	
+}

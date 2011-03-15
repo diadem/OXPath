@@ -1,0 +1,52 @@
+/**
+ * 
+ */
+package uk.ac.ox.comlab.oxpath;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+//import java.sql.Statement;
+
+/**
+ * Class used to test the Derby Database
+ * @author AndrewJSel
+ *
+ */
+public class DBTester {
+
+	/**
+	 * main class used for testing Derby database
+	 * @param args not used
+	 */
+	public static void main(String[] args) {
+		try {
+			Class.forName("org.postgresql.Driver");
+			String connectionUrl = "jdbc:postgresql://localhost:5432/XPressTest";
+			String username = "XPressUser";
+			String password = "XPr3ss3r";
+			
+			
+			Connection con = DriverManager.getConnection(connectionUrl, username, password);
+			//Statement stat = con.createStatement();
+			PreparedStatement ps = con.prepareStatement("SELECT MaxPrice FROM R1");
+			ResultSet result = ps.executeQuery();
+			result.next();
+			System.out.println(result.getString("MaxPrice"));
+			
+			
+			con.close();
+
+			
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+
+	}
+
+}
