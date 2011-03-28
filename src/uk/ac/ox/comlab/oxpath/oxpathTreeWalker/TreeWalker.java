@@ -76,6 +76,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -114,6 +115,7 @@ import com.gargoylesoftware.htmlunit.Page;
 import com.gargoylesoftware.htmlunit.TopLevelWindow;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.html.DomNode;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import com.gargoylesoftware.htmlunit.javascript.host.css.ComputedCSSStyleDeclaration;
@@ -211,7 +213,7 @@ public class TreeWalker {
 	 * @param doc input document
 	 * @return String representation of document
 	 */
-	private static String getStringFromDocument(Document doc)
+	public static String getStringFromDocument(Document doc)
 	{
 	    try
 	    {
@@ -851,20 +853,40 @@ public class TreeWalker {
 	 * @throws BadDataException in case of poorly constructed abstract syntax tree
 	 */
 	private OXPathType oxpathActionUntilPred(TreeWalkerState state) throws BadDataException{
+		System.out.println("oxpathActionUntilPred");
 		String test = getValue(toSimpleNode(state.getQueryPosition().jjtGetChild(0)));
 		for (OXPathDomNode oContextNode : state.getContext().nodeList()) {
 		    DomNode contextNode = oContextNode.getNode();		
 			while (contextNode.getByXPath(test).isEmpty()) {
 				try {
 					synchronized (contextNode.getPage()) {
-						contextNode.getPage().wait(10);
+						contextNode.getPage().wait(1000);
 					}
-				} catch (InterruptedException e) {
-					throw new BadDataException("InterruptedException for Until Predicate on Action!");
+				} catch (Exception e) {
+					System.out.println("until exception");
+//					throw new BadDataException("InterruptedException for Until Predicate on Action!");
 				}
 			}
 		}
 		return state.getContext();
+//		String url = webclient.getCurrentWindow().getTopWindow().getEnclosedPage().getUrl().toString();
+//		while (!url.contains("2011")) {
+//			try {
+//				((HtmlElement) state.getContext().nodeList().get(0).getNode()).click();
+//				long t0,t1;
+//		        t0=System.currentTimeMillis();
+//		        do{
+//		            t1=System.currentTimeMillis();
+//		        }
+//		        while (t1-t0<1000);
+//			} catch (IOException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			url = webclient.getCurrentWindow().getTopWindow().getEnclosedPage().getUrl().toString();
+//			System.out.println("Needed additional click");
+//		}
+//		return state.getContext();
 	}
 	
 	/**
@@ -876,6 +898,7 @@ public class TreeWalker {
 	private OXPathType oxpathActionWaitPred(TreeWalkerState state) throws BadDataException {
 		for (OXPathDomNode oContextNode : state.getContext().nodeList()) {
 			try {//TODO: verify this does the right thing with thread management
+				System.out.println("oxpathActionWaitPred");
 				synchronized (oContextNode.getNode().getPage()) {
 					oContextNode.getNode().getPage().wait(Long.parseLong(getValue(toSimpleNode(state.getQueryPosition().jjtGetChild(0)))));
 				}
@@ -980,12 +1003,15 @@ public class TreeWalker {
 //									helper.getFieldType(iContext),
 //									ActionKeywords.getActionKeyword(actionValue)).getEnclosingWindow().getTopWindow().getEnclosedPage(), 
 //											oContext.getParent(), oContext.getLast()));
+						//TODO: DELETE
+//						System.out.println(iContext + "," + iContext.getPage().getWebClient().getWebWindows().size());
 						OXPathDomNode odn = (new OXPathDomNode((DomNode) helper.takeAction(
 								((HtmlPage) iContext.getPage()),
 								iContext,
 								helper.getFieldType(iContext),
 								ActionKeywords.getActionKeyword(actionValue)).getEnclosingWindow().getTopWindow().getEnclosedPage(), 
 										oContext.getParent(), oContext.getLast()));
+//						System.out.println(webclient.getCurrentWindow().getTopWindow().getEnclosedPage().getUrl());
 						//do this to assure the page returned is the new focus
 						if (!webclient.getCurrentWindow().getTopWindow().equals(odn.getNode().getPage().getEnclosingWindow().getTopWindow())) {
 							newContext.add(new OXPathDomNode((DomNode) webclient.getCurrentWindow().getEnclosedPage(), 
@@ -1040,7 +1066,7 @@ public class TreeWalker {
 		else if (hasChildByName(toSimpleNode(state.getQueryPosition()),"OXPathActionUntilPred")) {//if has another child, then there is an action predicate
 			evaluate(newState(state).setContext(result).setQueryPosition(getChildByName(toSimpleNode(state.getQueryPosition()),"OXPathActionUntilPred")));
 		}
-//		System.out.println(webclient.getCurrentWindow().getTopWindow().getEnclosedPage().getUrl());
+		System.out.println(webclient.getCurrentWindow().getTopWindow().getEnclosedPage().getUrl());
 //		for (WebWindow w : webclient.getWebWindows()) {
 //			System.out.println(w.getTopWindow().getEnclosedPage().getUrl());
 //		}
@@ -1065,6 +1091,7 @@ public class TreeWalker {
 		HtmlPage newPage;
 		webclient.setAjaxController(new NicelyResynchronizingAjaxController());
 		webclient.getCache().setMaxSize(250);
+		webclient.getCookieManager().setCookiesEnabled(false);
 //		webclient.setPopupBlockerEnabled(true);
 //		webclient.setThrowExceptionOnFailingStatusCode(false);
 //		webclient.setJavaScriptEnabled(false);
@@ -1308,8 +1335,9 @@ public class TreeWalker {
 							//TODO: check if page is dirty; if so, find new = AFP(original), then filterList.add(new); else do below
 							filterList.add(original);
 						}
-						windowSet.remove((TopLevelWindow) filterNode.getNode()
-								.getPage().getEnclosingWindow().getTopWindow());
+//						windowSet.remove((TopLevelWindow) filterNode.getNode()
+//								.getPage().getEnclosingWindow().getTopWindow());
+						//TODO: Figure out why this is wrong!!
 						if (!original
 								.getNode()
 								.getPage()
@@ -1478,6 +1506,7 @@ public class TreeWalker {
 				.getEnclosingWindow().getTopWindow();
 				boolean inSet = this.windowSet.contains(actionWindow);
 		        if (!inSet) this.windowSet.add(actionWindow);
+		        //TODO: why this instead of result = evaluate(list);
 				result = new OXPathType(evaluate(list).nodeList());
 				if (!inSet)
 					this.windowSet.remove(actionWindow);

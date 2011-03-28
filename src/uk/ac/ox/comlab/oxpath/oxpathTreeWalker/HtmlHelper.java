@@ -36,6 +36,8 @@ import org.w3c.dom.Node;
 
 import uk.ac.ox.comlab.oxpath.BadDataException;
 import uk.ac.ox.comlab.oxpath.FieldTypes;
+
+import com.gargoylesoftware.htmlunit.WebWindow;
 import com.gargoylesoftware.htmlunit.html.DomNode;
 import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlCheckBoxInput;
@@ -190,8 +192,15 @@ public class HtmlHelper {
 //		element.focus();
 		switch (action) {
 			case CLICK :
-				if (element instanceof HtmlAnchor) ((HtmlAnchor) element).click();
-				returnPage = element.click();
+//				System.out.println("<>" + element);
+//				if (element instanceof HtmlAnchor) returnPage=((HtmlAnchor) element).click();
+//				else 
+					returnPage = element.click();
+//				System.out.println("<>" + returnPage.getUrl());
+//				for (WebWindow w : element.getPage().getWebClient().getWebWindows()) {
+//					System.out.println("<><>" + w.getEnclosedPage().getUrl());
+//					System.out.println("<><>");
+//				}
 				break;
 			case DBLCLICK :
 				returnPage = element.dblClick();

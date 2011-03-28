@@ -10,7 +10,8 @@ import java.io.StringReader;
 import uk.ac.ox.comlab.oxpath.BadDataException;
 
 public class OXPathScripter/*@bgen(jjtree)*/implements OXPathScripterTreeConstants, OXPathScripterConstants {/*@bgen(jjtree)*/
-  protected JJTOXPathScripterState jjtree = new JJTOXPathScripterState();public OXPathScripter()
+  protected JJTOXPathScripterState jjtree = new JJTOXPathScripterState();
+  public OXPathScripter()
   {
 
   }

@@ -1,14 +1,14 @@
 10
 
 dir
-759
+1118
 http://diadem.comlab.ox.ac.uk/svn/code/oxpath/OXPath/src/uk/ac/ox/comlab/oxpath/oxpathTreeWalker
 http://diadem.comlab.ox.ac.uk/svn/code
 
 
 
-2011-03-14T17:03:35.131698Z
-737
+2011-03-28T21:04:02.345312Z
+1118
 sellers
 
 
@@ -25,6 +25,13 @@ svn:special svn:externals svn:needs-lock
 
 
 bf2f10aa-1997-48b6-9e64-3d1883ff2e5b
+
+
+
+
+
+
+0
 
 ActionKeywords.java
 file
@@ -32,10 +39,10 @@ file
 
 
 
-2011-03-15T12:10:41.000000Z
-cf9e05671173c5c84650acc4a70444f0
-2010-10-24T15:45:15.360642Z
-59
+2011-03-28T20:53:51.000000Z
+c028d1784996a39f9e29c83de35e24aa
+2011-03-28T21:04:02.345312Z
+1118
 sellers
 has-props
 
@@ -58,7 +65,7 @@ has-props
 
 
 
-2007
+3599
 
 CSSProperties.java
 file
@@ -66,10 +73,10 @@ file
 
 
 
-2011-03-15T12:10:41.000000Z
-e5766ab7ca978cf726bc307b5a43f9ad
-2011-03-12T18:06:27.339104Z
-684
+2011-03-28T20:53:51.000000Z
+6dd213c580b70639f3dc82e15245bd73
+2011-03-28T21:04:02.345312Z
+1118
 sellers
 has-props
 
@@ -92,7 +99,7 @@ has-props
 
 
 
-1424
+2990
 
 HtmlHelper.java
 file
@@ -100,10 +107,10 @@ file
 
 
 
-2011-03-15T12:10:41.000000Z
-f6cd0bc64e3996fb892bd0466b01b022
-2010-11-10T15:16:38.197307Z
-149
+2011-03-28T20:53:51.000000Z
+0fb3373cce34adac3adc3c61b3cda10b
+2011-03-28T21:04:02.345312Z
+1118
 sellers
 has-props
 
@@ -126,7 +133,7 @@ has-props
 
 
 
-8166
+10124
 
 HtmlUnitTester.java
 file
@@ -134,10 +141,10 @@ file
 
 
 
-2011-03-15T12:10:41.000000Z
-5c90884810978953e257c48c052c5fab
-2010-11-09T23:27:56.753382Z
-148
+2011-03-28T20:53:51.000000Z
+5e0217e31c5a84ee7a377686e86da141
+2011-03-28T21:04:02.345312Z
+1118
 sellers
 has-props
 
@@ -160,7 +167,41 @@ has-props
 
 
 
-3609
+5201
+
+OXPathCommandLine.java
+file
+
+
+
+
+2011-03-28T20:53:51.000000Z
+2fc263885c30845d947cb8db3af4860c
+2011-03-28T21:04:02.345312Z
+1118
+sellers
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+3526
 
 OXPathDomNode.java
 file
@@ -168,10 +209,10 @@ file
 
 
 
-2011-03-15T12:10:41.000000Z
-991e26cb63f7668f479aebd83a3b7429
-2011-03-14T17:03:35.131698Z
-737
+2011-03-28T20:58:10.000000Z
+2bac358adb761a8223a22ead42bb5959
+2011-03-28T21:04:02.345312Z
+1118
 sellers
 has-props
 
@@ -194,7 +235,7 @@ has-props
 
 
 
-4012
+5604
 
 OXPathNodeList.java
 file
@@ -202,10 +243,10 @@ file
 
 
 
-2011-03-15T12:10:41.000000Z
-0a691b9feade02b0857cee9487dc0d2d
-2010-10-27T16:20:56.604760Z
-76
+2011-03-28T20:53:51.000000Z
+dd4c21ea161ba717669c65c9b6591769
+2011-03-28T21:04:02.345312Z
+1118
 sellers
 has-props
 
@@ -228,7 +269,7 @@ has-props
 
 
 
-7119
+8711
 
 OXPathType.java
 file
@@ -236,10 +277,10 @@ file
 
 
 
-2011-03-15T12:10:41.000000Z
-a5297a08032f4fe39c6dbba4dc22d04e
-2011-03-14T17:03:35.131698Z
-737
+2011-03-28T20:53:51.000000Z
+3b8a3299768ad5eb9011bc8c4784f16e
+2011-03-28T21:04:02.345312Z
+1118
 sellers
 has-props
 
@@ -262,7 +303,7 @@ has-props
 
 
 
-7582
+9174
 
 TreeWalker.java
 file
@@ -270,10 +311,10 @@ file
 
 
 
-2011-03-15T12:10:41.000000Z
-40afcf92f4aa14b3ae7c23942c606c0e
-2011-03-12T18:06:27.339104Z
-684
+2011-03-28T20:53:51.000000Z
+8d78f92e0e2dad4530e6aca2aa773428
+2011-03-28T21:04:02.345312Z
+1118
 sellers
 has-props
 
@@ -296,7 +337,7 @@ has-props
 
 
 
-98869
+101772
 
 TreeWalkerKleeneTest.java
 file
@@ -304,10 +345,10 @@ file
 
 
 
-2011-03-15T12:10:41.000000Z
-1177afbc331be398e43d8f4d2933165f
-2010-10-28T20:03:59.895152Z
-92
+2011-03-28T20:53:51.000000Z
+291e82e44081bbc1463362408adcbea5
+2011-03-28T21:04:02.345312Z
+1118
 sellers
 has-props
 
@@ -330,7 +371,7 @@ has-props
 
 
 
-90818
+92410
 
 TreeWalkerMemTest.java
 file
@@ -338,10 +379,10 @@ file
 
 
 
-2011-03-15T12:10:41.000000Z
-ebe1693a2a9c2dde9aefdc636c21b999
-2010-11-02T12:09:46.810024Z
-126
+2011-03-28T20:53:52.000000Z
+1cf6622931114a41aa489c06a6e4c0cf
+2011-03-28T21:04:02.345312Z
+1118
 sellers
 has-props
 
@@ -364,7 +405,7 @@ has-props
 
 
 
-90247
+91839
 
 TreeWalkerMemTest2.java
 file
@@ -372,10 +413,10 @@ file
 
 
 
-2011-03-15T12:10:41.000000Z
-ecae14596ede1002ac08385bb999b350
-2010-11-06T03:00:09.133031Z
-137
+2011-03-28T20:53:52.000000Z
+e283fcd39168284ef32f3d5922a7713b
+2011-03-28T21:04:02.345312Z
+1118
 sellers
 has-props
 
@@ -398,7 +439,7 @@ has-props
 
 
 
-96796
+98388
 
 TreeWalkerTest.java
 file
@@ -406,10 +447,10 @@ file
 
 
 
-2011-03-15T12:10:41.000000Z
-8d80a6e32ecda683966d8244388c5099
-2010-10-09T23:39:03.567253Z
-32
+2011-03-28T20:53:52.000000Z
+38e251b37f7b69f08e75f2c206432b0d
+2011-03-28T21:04:02.345312Z
+1118
 sellers
 has-props
 
@@ -432,5 +473,5 @@ has-props
 
 
 
-142
+1734
 

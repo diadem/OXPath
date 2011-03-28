@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c)2011, DIADEM Team
  * All rights reserved.
  * 
