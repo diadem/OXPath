@@ -1,0 +1,1 @@
+path={<http://www.upmystreet.com>/}/descendant::field()[1]/{"ox13hs"}/following::field()[1]/{click/}//*[@id#='neighbourhoodProfile']:<profile>[*[.#='Family income']/following::*[1]:<income=string(.)>][*[.#='Educated']/following::*[1]:<education=string(.)>][*[.#='children']/following::*[1]:<children=string(.)>];

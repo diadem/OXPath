@@ -10,6 +10,12 @@ RELEASE NOTES
 -----
 Thank you for using OXPath!  We hope that you enjoy it.
 
+For ease of use, we've added an executable jar called "oxpathcmdl.jar" in 
+/deploy.  It takes as input filename (formatted as before) as an argument, where 
+"-h" gives help and "-v" will allow verbose logging output.  It will print the 
+output xml document in the console.  The logging for the verbose configuration 
+is currently minimal but we will continue to improve it.
+
 This is a prototype of academic software described in the publications at 
 diadem-project.info/oxpath.  The tool itself is currently released as a .jar 
 file and will require Java to run.  It requires, as dependencies, the other 
@@ -43,12 +49,6 @@ computed style attributes take only as input the Rhino-standard encodings (for
 example, color properties are computed as "rgb(119, 119, 199)" rather than 
 "#777777").  FYI for using the style axis, our web browsing environment 
 simulates Firefox 3 and uses the HtmlUnit standard window size (1256X605 pixels).
-
-For ease of use, we've added an executable jar called "oxpathcmdl.jar" in 
-/deploy.  It takes as input filename (formatted as before) as an argument, where 
-"-h" gives help and "-v" will allow verbose logging output.  It will print the 
-output xml document in the console.  The logging for the verbose configuration 
-is currently minimal but we will continue to improve it.
 
 If you have any feedback (e.g. comments, bugs), please send to 
 oxpath@diadem-project.info. 
