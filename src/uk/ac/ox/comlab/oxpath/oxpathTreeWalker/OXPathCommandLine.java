@@ -30,6 +30,7 @@ import static uk.ac.ox.comlab.oxpath.scriptParser.OXPathScripter.getJJTree;
 
 //import java.net.URI;
 //import java.net.URISyntaxException;
+import java.io.FileNotFoundException;
 import java.net.URL;
 
 import org.apache.log4j.PropertyConfigurator;
@@ -82,7 +83,10 @@ public class OXPathCommandLine {
 			SimpleNode root = getJJTree(inputfile);			
 			Document d = TreeWalker.evaluateOXPathQuery(root);
 			System.out.println(TreeWalker.getStringFromDocument(d));
-		} catch (Exception e) {
+		} catch (FileNotFoundException e) {
+			System.out.println("File \"" + inputfile + "\" not found!");
+		}
+			catch (Exception e) {
 			System.out.println(e.toString());
 //			e.printStackTrace();
 		} 

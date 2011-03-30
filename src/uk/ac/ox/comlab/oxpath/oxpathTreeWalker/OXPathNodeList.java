@@ -303,5 +303,16 @@ public class OXPathNodeList<T extends OXPathDomNode> implements NodeList, List<T
 	 * structure holding state data
 	 */
 	private ArrayList<T> nodelist = new ArrayList<T>();
+
+
+	public String asXML() {
+		StringBuilder out = new StringBuilder();
+		for (T node : nodelist) {
+			DomNode domnode = node.getNode();
+			out.append(domnode.asXml());
+		}
+//		System.out.println(out.toString());
+		return out.toString();
+	}
 	
 }

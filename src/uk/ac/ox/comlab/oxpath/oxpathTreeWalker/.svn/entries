@@ -171,14 +171,14 @@ has-props
 
 OXPathCommandLine.java
 file
+1128
 
 
 
-
-2011-03-28T20:53:51.000000Z
-2fc263885c30845d947cb8db3af4860c
-2011-03-28T21:04:02.345312Z
-1118
+2011-03-30T08:00:54.000000Z
+6f80fd006c2b49a25c65ef3fcf0b9311
+2011-03-30T08:34:35.419333Z
+1128
 sellers
 has-props
 
@@ -201,7 +201,7 @@ has-props
 
 
 
-3526
+3669
 
 OXPathDomNode.java
 file
@@ -239,14 +239,14 @@ has-props
 
 OXPathNodeList.java
 file
+1131
 
 
 
-
-2011-03-28T20:53:51.000000Z
-dd4c21ea161ba717669c65c9b6591769
-2011-03-28T21:04:02.345312Z
-1118
+2011-03-30T12:03:49.000000Z
+037e40fd957339ed69e3315aaa2e9c17
+2011-03-30T13:00:22.315733Z
+1131
 sellers
 has-props
 
@@ -269,7 +269,7 @@ has-props
 
 
 
-8711
+8961
 
 OXPathType.java
 file
@@ -307,14 +307,14 @@ has-props
 
 TreeWalker.java
 file
+1131
 
 
 
-
-2011-03-28T20:53:51.000000Z
-8d78f92e0e2dad4530e6aca2aa773428
-2011-03-28T21:04:02.345312Z
-1118
+2011-03-30T12:46:56.000000Z
+bcc4fd0023702e50133740f080344333
+2011-03-30T13:00:22.315733Z
+1131
 sellers
 has-props
 
@@ -337,7 +337,7 @@ has-props
 
 
 
-101772
+103586
 
 TreeWalkerKleeneTest.java
 file
@@ -474,4 +474,72 @@ has-props
 
 
 1734
+
+log4jsilent.properties
+file
+1128
+
+
+
+2011-03-30T08:04:13.000000Z
+3b23d0be8d154c60eec349c7a0fbee2e
+2011-03-30T08:34:35.419333Z
+1128
+sellers
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+317
+
+log4jverbose.properties
+file
+1128
+
+
+
+2011-03-16T18:12:49.000000Z
+eeb3bff66ad4a59dbd21ac718b828c8a
+2011-03-30T08:34:35.419333Z
+1128
+sellers
+has-props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+318
 

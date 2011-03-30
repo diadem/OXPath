@@ -72,6 +72,7 @@ import static uk.ac.ox.comlab.oxpath.scriptParser.OXPathScripterTreeConstants.JJ
 import static uk.ac.ox.comlab.oxpath.scriptParser.OXPathScripterTreeConstants.JJTXPATHUNARYEXPR;
 import static uk.ac.ox.comlab.oxpath.scriptParser.OXPathScripterTreeConstants.JJTXPATHUNIONEXPR;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
@@ -85,6 +86,7 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
@@ -94,11 +96,14 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 import uk.ac.ox.comlab.oxpath.BadDataException;
 import uk.ac.ox.comlab.oxpath.benchmark.BenchFactory;
@@ -130,7 +135,7 @@ import com.gargoylesoftware.htmlunit.javascript.host.html.HTMLElement;
 public class TreeWalker {
 	
 	public static void main(String[] args) {
-		PropertyConfigurator.configure("log4j.properties");
+		PropertyConfigurator.configure("log4jverbose.properties");
 //		System.getProperties().put("org.apache.commons.logging.simplelog.defaultlog", "trace");
 		try {
 			SimpleNode root = getJJTree(args[0]);			
@@ -176,8 +181,10 @@ public class TreeWalker {
 	 * @throws ParserConfigurationException in case parser configuration error
 	 * @throws DOMException in case of XML Document exception 
 	 * @throws BadDataException in case of AST structure exception
+	 * @throws IOException in case of malformed xml
+	 * @throws SAXException 
 	 */
-	public static Document evaluateOXPathQuery(Node n) throws ParserConfigurationException, DOMException, BadDataException {
+	public static Document evaluateOXPathQuery(Node n) throws ParserConfigurationException, DOMException, BadDataException, SAXException, IOException {
 		TreeWalker tw = new TreeWalker();
 		OXPathType result = tw.evaluate(tw.newState(new OXPathType(), n));
 		switch (result.isType()) {
@@ -815,6 +822,10 @@ public class TreeWalker {
 		for (OXPathDomNode n : nodes) {
 			int nodeID = ++this.nodeNum;
 			if (attribute) {
+				OXPathType attributeResultRaw = evaluate(newState(state).setQueryPosition(state.getQueryPosition().jjtGetChild(1)));
+				String attributeResultFinal;
+				if (attributeResultRaw.isType().equals(NODESET)) attributeResultFinal=attributeResultRaw.nodeList().asXML();
+				else attributeResultFinal = attributeResultRaw.string();
 				output.add(
 //					new OutputNode(nodeID,n.getParent(),
 //							getValue(toSimpleNode(state.getQueryPosition().jjtGetChild(0))),
@@ -823,7 +834,8 @@ public class TreeWalker {
 				new OutputNode(nodeID,n.getParent(),
 						getValue(toSimpleNode(state.getQueryPosition().jjtGetChild(0))),
 //						evaluate(newState(state).setQueryPosition(state.getQueryPosition().jjtGetChild(1))).string()));//TODO: Fix this so that extraction markers work better
-						evaluate(newState(state).setQueryPosition(state.getQueryPosition().jjtGetChild(1))).string()));
+//						evaluate(newState(state).setQueryPosition(state.getQueryPosition().jjtGetChild(1))).string()));
+						attributeResultFinal));
 				
 			}
 			else {
@@ -853,7 +865,7 @@ public class TreeWalker {
 	 * @throws BadDataException in case of poorly constructed abstract syntax tree
 	 */
 	private OXPathType oxpathActionUntilPred(TreeWalkerState state) throws BadDataException{
-		System.out.println("oxpathActionUntilPred");
+//		System.out.println("oxpathActionUntilPred");
 		String test = getValue(toSimpleNode(state.getQueryPosition().jjtGetChild(0)));
 		for (OXPathDomNode oContextNode : state.getContext().nodeList()) {
 		    DomNode contextNode = oContextNode.getNode();		
@@ -863,7 +875,7 @@ public class TreeWalker {
 						contextNode.getPage().wait(1000);
 					}
 				} catch (Exception e) {
-					System.out.println("until exception");
+//					System.out.println("until exception");
 //					throw new BadDataException("InterruptedException for Until Predicate on Action!");
 				}
 			}
@@ -898,7 +910,7 @@ public class TreeWalker {
 	private OXPathType oxpathActionWaitPred(TreeWalkerState state) throws BadDataException {
 		for (OXPathDomNode oContextNode : state.getContext().nodeList()) {
 			try {//TODO: verify this does the right thing with thread management
-				System.out.println("oxpathActionWaitPred");
+//				System.out.println("oxpathActionWaitPred");
 				synchronized (oContextNode.getNode().getPage()) {
 					oContextNode.getNode().getPage().wait(Long.parseLong(getValue(toSimpleNode(state.getQueryPosition().jjtGetChild(0)))));
 				}
@@ -1011,7 +1023,7 @@ public class TreeWalker {
 								helper.getFieldType(iContext),
 								ActionKeywords.getActionKeyword(actionValue)).getEnclosingWindow().getTopWindow().getEnclosedPage(), 
 										oContext.getParent(), oContext.getLast()));
-//						System.out.println(webclient.getCurrentWindow().getTopWindow().getEnclosedPage().getUrl());
+						logger.info("Accessing page at URL: " + webclient.getCurrentWindow().getTopWindow().getEnclosedPage().getUrl());
 						//do this to assure the page returned is the new focus
 						if (!webclient.getCurrentWindow().getTopWindow().equals(odn.getNode().getPage().getEnclosingWindow().getTopWindow())) {
 							newContext.add(new OXPathDomNode((DomNode) webclient.getCurrentWindow().getEnclosedPage(), 
@@ -1066,7 +1078,7 @@ public class TreeWalker {
 		else if (hasChildByName(toSimpleNode(state.getQueryPosition()),"OXPathActionUntilPred")) {//if has another child, then there is an action predicate
 			evaluate(newState(state).setContext(result).setQueryPosition(getChildByName(toSimpleNode(state.getQueryPosition()),"OXPathActionUntilPred")));
 		}
-		System.out.println(webclient.getCurrentWindow().getTopWindow().getEnclosedPage().getUrl());
+//		System.out.println(webclient.getCurrentWindow().getTopWindow().getEnclosedPage().getUrl());
 //		for (WebWindow w : webclient.getWebWindows()) {
 //			System.out.println(w.getTopWindow().getEnclosedPage().getUrl());
 //		}
@@ -1727,25 +1739,37 @@ public class TreeWalker {
 	 * Returns output of query.  Builds the document from an input list
 	 * @return XML Document containing
 	 * @throws ParserConfigurationException in case of XML parse error
+	 * @throws IOException 
+	 * @throws SAXException 
 	 */
-	private Document returnOutput() throws ParserConfigurationException {
+	private Document returnOutput() throws ParserConfigurationException, SAXException, IOException {
 		//TODO: Sort siblings based on document order
-		Document outputDoc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+		DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder(); 
+		Document tempDoc = db.newDocument();
 		ArrayList<Element> elements = new ArrayList<Element>();
 		//elements are identified by position in elements rather than by name 
-		elements.add(outputDoc.createElement("results"));
-		outputDoc.appendChild(elements.get(0));
+		elements.add(tempDoc.createElement("results"));
+		tempDoc.appendChild(elements.get(0));
 		for (OutputNode o : output) {
-			elements.add(o.getId(), outputDoc.createElement(o.getLabel()));
+			elements.add(o.getId(), tempDoc.createElement(o.getLabel()));
 			elements.get(o.getParent()).appendChild(elements.get(o.getId()));
 			if (!o.getValue().equals("")) {
-				Text textNode = outputDoc.createTextNode(o.getValue());
+				while (o.getValue().contains(LESSTHANSUB)||o.getValue().contains(GREATERTHANSUB)) {
+					logger.info("Reserved html sequence encountered");
+					LESSTHANSUB += "asdfasdf";
+					GREATERTHANSUB += "werqeew";
+				}
+				Text textNode = tempDoc.createTextNode(o.getValue().replace("<",LESSTHANSUB).replace(">",GREATERTHANSUB));//.replace("&", AMPSUB));
 				elements.get(o.getId()).appendChild(textNode);
 			}
 //			System.out.println(elements.get(o.getId()));
 		}
+		String tempDocAsString = getStringFromDocument(tempDoc).replace(LESSTHANSUB,"<").replace(GREATERTHANSUB, ">");//.replace(AMPSUB,"&");
+//		System.out.println(tempDocAsString);
+		Document FinalDoc = db.parse(new InputSource(new ByteArrayInputStream(tempDocAsString.getBytes("utf-8"))));
 		
-		return outputDoc;
+		
+		return FinalDoc;
 		
 //		for (OutputNode o : output) {
 //			System.out.println(o.id+" "+o.parent+" "+ o.label+ " "+ o.value);
@@ -1798,6 +1822,11 @@ public class TreeWalker {
 	
 //	int counter = 1;
 	private int numPagesAccessed = 0;
+	
+	/**
+	 * log4jlogger
+	 */
+	private static Logger logger = Logger.getLogger("oxpathlog");
 	
 	/**
 	 * Class for representing output nodes
@@ -2262,5 +2291,18 @@ public class TreeWalker {
 	 * stores backwards oxpath axes
 	 */
 	public static final String[] BACKWARDAXES = {"ancestor", "preceding"};
+	//TODO: FIX these
+	/**
+	 * Some unique value (not occurring in XML) to substitute for < for dealing with the Java Document interface 
+	 */
+	public static String LESSTHANSUB = "etrwetwert";
+	/**
+	 * Some unique value (not occurring in XML) to substitute for > for dealing with the Java Document interface 
+	 */
+	public static String GREATERTHANSUB = "iouopiupiouopiu";
+	/**
+	 * Some unique value (not occurring in XML) to substitute for & for dealing with the Java Document interface 
+	 */
+	public static String AMPSUB = "xzvczcvzczxvczcxz";
 	
 }
