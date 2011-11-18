@@ -1,1 +1,0 @@
-path={<http://upcoming.yahoo.com/>/}//field()[@name='q']/{"Music"}/following::field()[1]/{"OX12RG"/}/descendant::*[.#='Search Events'][last()]/{click/}//div.searchCount:<Test=string(.)>;

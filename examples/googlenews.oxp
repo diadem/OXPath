@@ -1,1 +1,0 @@
-path=doc("http://news.google.com")//div[@class#="story"]:<story>[.//h2:<title=string(.)>][.//span[style::color="rgb(119, 119, 119)"]:<source=string(.)>];
