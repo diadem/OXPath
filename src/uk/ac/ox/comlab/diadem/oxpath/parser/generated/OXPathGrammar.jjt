@@ -1,0 +1,1220 @@
+/*
+ * Copyright (c)2011, DIADEM Team
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *     * Redistributions of source code must retain the above copyright
+ *       notice, this list of conditions and the following disclaimer.
+ *     * Redistributions in binary form must reproduce the above copyright
+ *       notice, this list of conditions and the following disclaimer in the
+ *       documentation and/or other materials provided with the distribution.
+ *     * Neither the name of the DIADEM team nor the
+ *       names of its contributors may be used to endorse or promote products
+ *       derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL DIADEM Team BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+/**
+ * JJTree template file for specifying the OXPath script parser
+ */
+options
+{
+  STATIC=false;
+  MULTI=true;
+  VISITOR=true;
+  VISITOR_EXCEPTION="uk.ac.ox.comlab.diadem.oxpath.utils.OXPathException";
+//  VISITOR_RETURN_TYPE="OXPathType";
+  OUTPUT_DIRECTORY="..";
+  JJTREE_OUTPUT_DIRECTORY="../ast";
+  NODE_PACKAGE="uk.ac.ox.comlab.diadem.oxpath.parser.ast"; 
+  JDK_VERSION = "1.5";
+  LOOKAHEAD = 1;
+//  IGNORE_CASE =true;
+}
+
+PARSER_BEGIN(OXPathParser)
+package uk.ac.ox.comlab.diadem.oxpath.parser;
+
+import java.io.FileReader;
+
+import java.lang.StringBuilder;
+
+import java.io.StringReader;
+
+import java.util.ArrayList;
+
+import uk.ac.ox.comlab.diadem.oxpath.dom.ActionKeywords;
+
+import uk.ac.ox.comlab.diadem.oxpath.utils.OXPathException;
+
+import uk.ac.ox.comlab.diadem.oxpath.model.language.functions.XPathFunction;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.functions.XPathFunctions;
+
+import uk.ac.ox.comlab.diadem.oxpath.model.language.operators.BinaryOperator;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.operators.HigherLevelOp;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.operators.EqualityExprOp;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.operators.RelationalExprOp;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.operators.AdditiveExprOp;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.operators.MultiplicativeExprOp;
+
+import uk.ac.ox.comlab.diadem.oxpath.model.language.AxisType;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.NodeTestType;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.Axis;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.ForwardAxis;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.BackwardAxis;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.OXPathAxis;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.AbbreviatedAxis;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.OXPathNodeTest;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.XPathNodeTest;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.ParameterizedProcessingInstruction;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.XPathNameTest;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.NodeTest;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.OXPathExtractionMarker;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.Selector;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.SelectorPredicate;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.Action;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.PositionAction;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.ExplicitAction;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.KeywordAction;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.VariableAction;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.URLAction;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.ActionType;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.Step;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.OXPathStep;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.AbbreviatedStep;
+import uk.ac.ox.comlab.diadem.oxpath.model.language.OXPathPredicate;
+
+
+public class OXPathParser{  
+
+public OXPathParser()
+  {
+    
+  }
+
+  public static void main(String args [])
+  {
+    try
+    {
+      FileReader reader = new FileReader(args[0]);
+      OXPathParser oxpathparser = new OXPathParser(reader);
+      Node n = oxpathparser.Expression();
+ }
+    catch (Exception e)
+    {
+      System.out.println("Oops.");
+      System.out.println(e.getMessage());
+      e.printStackTrace();
+    }
+  }
+
+   /**
+   * Returns JJTree of script
+   */
+   public static Node getJJTree(String inputfile) throws OXPathException
+	   {
+	       try	       {	         FileReader reader = new FileReader(inputfile);
+	         OXPathParser oxpathparser = new OXPathParser(reader);
+	         return oxpathparser.Expression();
+	       } catch (Exception e)	       {			 throw new OXPathException("Parser exception!",e);
+   	      }
+	   }
+
+	   public static Node getJJTreeFromString(String in) throws OXPathException
+	   {
+           try           {
+		      return new OXPathParser(new StringReader(in)).Expression();
+		    } catch (Exception e)		    {		      throw new OXPathException("Parser Exception!",e);
+		    }
+	   }
+
+	   public static Node safeGetChild(Node parent, int index) throws OXPathException {
+     if (isSafeChild(parent,index))
+     {
+       return parent.jjtGetChild(index);
+     }
+     else throw new OXPathException("Not an OXPath AST node!");
+	   }
+
+	   public static boolean isSafeChild(Node parent, int index) {
+	     if (parent.jjtGetChild(index) instanceof Node)
+	     {
+	       return true;
+	     }
+	     else
+	     {
+	       return false;
+	     }
+	   }
+
+	   public static boolean hasChildByName(Node parent, String name)
+	   {
+	     for (int i = 0; i<parent.jjtGetNumChildren(); i++)
+	     {
+	       if (parent.jjtGetChild(i).toString().contains(name))
+	       {
+	         return true;
+	       }
+     }
+     return false;
+	   }
+
+	   	public static boolean hasDescendantOrSelfByName(Node parent, String name) throws OXPathException
+	   {
+	     if (parent.toString().contains(name)) return true;
+	     else
+	     {
+	       for (int i = 0; i<parent.jjtGetNumChildren(); i++)
+	           {
+	              if (hasDescendantOrSelfByName(parent.jjtGetChild(i),name)) {
+	                  return true;
+	              }
+           }
+     }
+     return false;
+	   }
+
+	   public static boolean hasActionOnMainPath(Node node)	   {			if (node.toString().contains("ASTOXPathActionPath")) return true;
+			else			{				for (int i = 0; i < node.jjtGetNumChildren(); i++)
+				{					Node child = node.jjtGetChild(i);
+					if (!child.toString().contains("ASTSimpleOXPathStepPath") && hasActionOnMainPath(child)) return true;
+				}
+				return false;
+			}
+	   }     	       
+
+	   public static Node getChildByName(Node parent, String name) throws OXPathException
+	   {
+	     for (int i = 0; i<parent.jjtGetNumChildren(); i++)
+	     {
+	       if (parent.jjtGetChild(i).toString().contains(name))
+	       {
+	         return safeGetChild(parent,i);
+	       }
+     }
+     throw new OXPathException("Child not found!");
+	   }
+		  
+			   public static int test(String tester)
+			   {
+		    System.out.println(tester);
+    return 1;
+   }
+
+   public static boolean isDescendant(Node a, Node d)
+   {
+     if (a.equals(d)) return true;
+     Node temp = d.jjtGetParent();
+	 while (!(temp==null))
+	 {
+	     if (a.equals(temp)) return true;
+	     temp = temp.jjtGetParent();
+	 }
+	 return false;
+   }
+}
+
+PARSER_END(OXPathParser)
+
+< IN_URL > TOKEN :
+{
+  < APOSTROPHE_URL : "'" >
+| < QUOTE_URL : "\"" >
+}
+
+
+< DEFAULT , IN_URL , IN_PATH_OP > SKIP :  /* IN-LINE WHITE SPACE*/
+{
+   <  SPACE :  " " >
+|  <  TAB : "\t" >
+|  <  NEWLINE : ("\n"|"\r"|"\r\n")>
+}
+
+< IN_URL > TOKEN :
+{
+  < PROTOCOL : "http" ("s")? ":" "/" "/">
+}
+
+< DEFAULT > TOKEN :
+{
+  < FOCUS : "focus" > : DEFAULT
+| < CLICK : "click" > : DEFAULT
+| < DBLCLICK : "dblclick" > : DEFAULT
+| < MOUSEDOWN : "mousedown" > : DEFAULT
+| < MOUSEENTER : "mouseenter" > : DEFAULT
+| < MOUSEMOVE : "mousemove" > : DEFAULT
+| < MOUSEOVER : "event" > : DEFAULT
+| < MOUSEOUT : "mouseout" > : DEFAULT
+| < MOUSEUP : "mouseup" > : DEFAULT
+| < WHEEL : "wheel" > : DEFAULT
+| < SUBMIT : "submit" > : DEFAULT
+//| < UNCLICK : "unclick" > : DEFAULT
+| < CHECK : "check" > : DEFAULT
+| < UNCHECK : "uncheck" > : DEFAULT
+//| < WHILE : "while" >
+}
+
+< IN_URL > TOKEN :
+{
+  < END_URL_IN_PATH : ">" > : DEFAULT 
+| < END_URL : "}" > : DEFAULT
+| < SLASH_URL : "/" >
+| < QUESTION_URL : "?" >
+| < MINUS_URL : "-" >
+| < UNDERSCORE_URL : "_" >
+| < PERIOD_URL : "." >
+| < AMPERSAND_URL : "&" >
+| < EQUALS_URL : "=" >
+| < DOLLAR_URL : "$" >
+| < PERCENT_URL : "%" >
+| < AT_URL : "@" >
+| < PLUS_URL : "+" >
+| < EXCLAIMATION_URL : "!" >
+| < STAR_URL : "*" >
+| < OPEN_PARAN_URL : "(" >
+| < CLOSE_PARAN_URL : ")" >
+| < COMMA_URL : "," >
+}
+
+< IN_URL > TOKEN : /* VALUE RETURNS FOR URL Expression */
+{
+  < LOWER_ALPHA : ["a"-"z"] >
+| < UPPER_ALPHA : ["A"-"Z"] >
+| < DIGIT : ["0"-"9"] >
+}
+
+< DEFAULT, IN_PATH_OP, IN_URL > TOKEN : /* Handling line terminals */
+	{
+	  < ENDLINE : ";" > : DEFAULT
+	}
+	       
+< DEFAULT > TOKEN :
+{
+< EQUALS_DEFAULT : "=" > : DEFAULT
+}
+
+< DEFAULT , IN_PATH_OP > TOKEN : /* EXPR TOKEN */
+{
+  < DOC_BEGIN : "doc" ( < SPACE > | < TAB > | < NEWLINE > )* "(" > : DEFAULT
+| < OPEN_PARAN : "(" > : DEFAULT
+| < CLOSE_PARAN : ")" > : IN_PATH_OP
+| < OPEN_OPTIONAL : "[?" > : DEFAULT
+| < OPEN_BRACKET : "[" > : DEFAULT
+| < CLOSE_BRACKET : "]" > : IN_PATH_OP
+| < BEGIN_URL_IN_PATH : "{" ( < SPACE > | < TAB > | < NEWLINE > )* "<" > : IN_URL
+| < OPEN_CURLY : "{" > : DEFAULT
+| < CLOSE_CURLY : "}" > :DEFAULT
+| < COMMA : "," > : DEFAULT
+| < NUMBER : (< DIGITS > "." (< DIGITS >)?) | ("." < DIGITS >) > : IN_PATH_OP//Integers are returned as <DIGITS > tokens
+| < DESCENDENT_OR_SELF_SHORT : "/" ( < SPACE > | < TAB > | < NEWLINE > )* "/" > : DEFAULT
+| < BEGIN_USER_ACTION :  "/" ( < SPACE > | < TAB > | < NEWLINE > )* "{" > : DEFAULT
+| < BEGIN_KLEENE_STAR :  "/" ( < SPACE > | < TAB > | < NEWLINE > )* "(" > : DEFAULT
+| < BEGIN_BOUNDED_KLEENE_STAR_PRED : "*" ( < SPACE > | < TAB > | < NEWLINE > )* "{" > : DEFAULT
+| < SLASH : "/" > : DEFAULT
+| < BEGIN_EXTRACT_MARK : ":<" > : DEFAULT
+
+}
+
+< DEFAULT > TOKEN : /* EXPR TOKEN */
+{
+  //OXPath axis names
+< STYLE : "style"  ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : DEFAULT
+| < ATTRIBUTE : "attribute" ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : DEFAULT
+| < CHILD : "child" ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : DEFAULT
+| < DESCENDANTORSELF : "descendant-or-self" ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : DEFAULT
+| < DESCENDANT : "descendant" ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : DEFAULT
+| < FOLLOWINGSIBLING : "following-sibling" ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : DEFAULT
+| < FOLLOWING : "following" ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : DEFAULT
+| < NAMESPACE : "namespace" ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : DEFAULT
+| < SELF : "self" ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : DEFAULT
+| < ANCESTORORSELF : "ancestor-or-self" ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : DEFAULT
+| < ANCESTOR : "ancestor" ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : DEFAULT
+| < PARENT : "parent" ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : DEFAULT
+| < PRECEDINGSIBLING : "preceding-sibling" ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : DEFAULT
+| < PRECEDING : "preceding" ( < SPACE > | < TAB > | < NEWLINE > )* < AXIS > > : DEFAULT
+| < AXIS : "::" > : DEFAULT
+| < COMMENT : "comment" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < TEXT : "text" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < PROCESSING_INSTRUCTION : "processing-instruction" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < NODE : "node" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < FIELD : "field" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > >   : DEFAULT
+| < ANY_FIELD : "any-field" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > :DEFAULT
+| < PERIOD : "." > : IN_PATH_OP
+| < PARENT_SHORT : ".." > : IN_PATH_OP
+| < AT : "@" > : DEFAULT
+| < POSITION : "position" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < LAST : "last" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < COUNT : "count" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < ID : "id" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < NAMESPACEURI : "namespace-uri" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < LOCALNAME : "local-name" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < NAME : "name" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < STRING : "string" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < CONCAT : "concat" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < STARTSWITH : "starts-with" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < CONTAINSFUNC : "contains" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < SUBSTRINGBEFORE : "substring-before" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < SUBSTRINGAFTER : "substring-after" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < SUBSTRING : "substring" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < SUBSTRINGLENGTH : "string-length" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < NORMALIZESPACE : "normalize-space" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < TRANSLATE : "translate" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < BOOLEAN : "Boolean" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < NOT : "not" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < TRUE : "true" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < FALSE : "false" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < LANG : "lang" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < NUMBERFUNC : "number" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < SUM : "sum" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < FLOOR : "floor" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < CEILING : "ceiling" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < ROUND : "round" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
+| < VARIABLE : < DOLLAR > < NCNAME > > : DEFAULT
+| < END_EXTRACT_MARK : ">" > : DEFAULT
+| < NEGATIVE : "-"> : DEFAULT
+}
+
+< IN_PATH_OP > TOKEN : /* EXPR TOKEN */
+{
+  < AND : "and" > : DEFAULT
+| < OR : "or" > : DEFAULT
+| < MOD : "mod" > : DEFAULT
+| < DIV : "div" > : DEFAULT
+| < MULTIPLY : "*" > : DEFAULT
+| < UNION : "|" > : DEFAULT
+| < PLUS : "+" > : DEFAULT
+| < MINUS : "-" > : DEFAULT
+| < LESSTE : "<=" > : DEFAULT
+| < LESS : "<" > : DEFAULT
+| < GREATERTE : ">=" > : DEFAULT
+| < GREATER : ">" > : DEFAULT
+| < NOTEQUAL : "!=" > : DEFAULT
+| < EQUALS : "=" > : DEFAULT
+| < PERIOD_OP : "." > : DEFAULT
+| < HASH : "#" >   : DEFAULT
+| < WORD_TEST : "~=" > : DEFAULT
+| < CONTAINS : "#=" > : DEFAULT
+}
+
+< DEFAULT, IN_PATH_OP > TOKEN : /* ACTION KEY WORDS */
+{
+  < WAIT : "wait" ( < SPACE > | < TAB > | < NEWLINE > )* "=" > 
+| < UNTIL : "until" ( < SPACE > | < TAB > | < NEWLINE > )* "=" > 
+}
+
+< DEFAULT > TOKEN : /*VARIABLE*/
+{
+  < DOLLAR : "$" > : DEFAULT
+}
+
+< DEFAULT > TOKEN : /* NAME_TEST */
+{
+  < WILDCARD : "*" > : IN_PATH_OP
+| < NCNAME : < NAMESTARTCHAR > (< NAMESTARTCHAR > | "-" | ["0"-"9"])* > : IN_PATH_OP//period removed to allow for use of CSS class operator 
+| < NAMESTARTCHAR : ["A"-"Z"] | ["a"-"z"] | "_" >
+| < COLON : ":" >
+}
+
+< DEFAULT > TOKEN : /* NUMBER */
+{
+  < DIGITS : (["0"-"9"])+ >
+}
+
+< DEFAULT > MORE :
+{
+< "\"" > : IN_DOUBLE_QUOTE_STRING_PATH
+}
+
+< IN_DOUBLE_QUOTE_STRING_PATH >
+TOKEN :
+{
+< DOUBLE_QUOTE_STRING_PATH : "\"" > : IN_PATH_OP
+}
+
+< IN_DOUBLE_QUOTE_STRING_PATH >
+MORE :
+{
+< ~["\""] >
+}
+
+< DEFAULT > MORE :
+{
+< "'" > : IN_SINGLE_QUOTE_STRING_PATH
+}
+
+< IN_SINGLE_QUOTE_STRING_PATH >
+TOKEN :
+{
+< SINGLE_QUOTE_STRING_PATH : "'" > : IN_PATH_OP
+}
+
+< IN_SINGLE_QUOTE_STRING_PATH >
+MORE :
+{
+< ~["'"] >
+}
+
+//Apparently, we can't get rid of this - the AST needs a fixed root node for JavaCC
+Node Expression() :
+{}
+{
+  XPathExpr() < EOF >
+  {
+    return jjtThis;
+  }
+}
+
+
+String Letter() #void:
+{Token t;}
+{
+ ( t = < UPPER_ALPHA > {return t.image;} )
+ | ( t = < LOWER_ALPHA > {return t.image;} )
+}
+
+String URLName() #void:
+{StringBuilder sb = new StringBuilder();
+ String sp;
+ String hp;
+ Token t1;
+ String up;
+ Token t2;
+ String us;}
+{//adapted from w3c BNF grammar for BNF located @ http://www.w3.org/Addressing/URL/5_BNF.html#z18
+  sp = SupportedProtocols() hp = HostPort() {sb.append(sp); sb.append(hp);}
+  [ t1 = < SLASH_URL >  up = URLPath() {sb.append(t1.image); sb.append(up);} ]
+  [ t2 = < QUESTION_URL > us = URLSearch() {sb.append(t2.image); sb.append(us);} ]
+  {return sb.toString();}
+}
+
+String SupportedProtocols() #void:
+{Token t;}
+{//current supported protocols of http and https
+  t = < PROTOCOL >
+  {return t.image;}
+}
+
+String HostPort() #void:
+{StringBuilder sb = new StringBuilder();
+ String h;
+ Token t;
+ int p;}
+{
+  h = Host() {sb.append(h);} [ t = < COLON > p = Port() {sb.append(t.image); sb.append(p);} ]
+  {return sb.toString();}
+}
+
+String Host() #void:
+{String subtree;}
+{
+  (subtree = HostName() {return subtree;} )
+   | ( subtree = HostNumber() {return subtree;}) 
+}
+
+String HostName() #void:
+{String subtree;}
+{
+  subtree = URLIAlpha() {return subtree;}
+}
+
+String URLIAlpha() #void:
+{StringBuilder st = new StringBuilder();
+ String l;
+ String u;}
+{
+  l=Letter() {st.append(l);} [ u=URLXAlphas() {st.append(u);} ]
+  {return st.toString();}
+}
+
+String URLXAlphas() #void:
+{StringBuilder sb = new StringBuilder();
+ String u;
+ String us;}
+{
+ u = URLXAlpha() {sb.append(u);} [ us = URLXAlphas() {sb.append(us);} ]
+ {return sb.toString();}
+}
+
+String URLXAlpha() #void:
+{String s;
+ Token t;}
+{
+	  s=Letter() {return s;}
+	| t=< DIGIT > {return t.image;}
+	| s=URLSafe() {return s;}
+	| s=URLExtra() {return s;}
+	| s=URLEscape() {return s;}
+}
+
+String URLSafe() #void:
+{Token t;}
+{
+  t=< DOLLAR_URL > {return t.image;}
+| t=< MINUS_URL > {return t.image;}
+| t=< UNDERSCORE_URL > {return t.image;}
+| t=< AT_URL > {return t.image;}
+| t=< PERIOD_URL > {return t.image;}
+| t=< AMPERSAND_URL > {return t.image;}
+| t=< PLUS_URL > {return t.image;}
+| t=< EQUALS_URL > {return t.image;}//not part of the grammar; in practice, however, <EQUALS_URL> is URL safe  
+}
+
+String URLExtra() #void:
+{Token t;}
+{
+  t=< EXCLAIMATION_URL > {return t.image;}
+| t=< STAR_URL > {return t.image;}
+| t=< QUOTE_URL > {return t.image;}
+| t=< APOSTROPHE_URL > {return t.image;}
+| t=< OPEN_PARAN_URL > {return t.image;}
+| t=< CLOSE_PARAN_URL > {return t.image;}
+| t=< COMMA_URL > {return t.image;}
+
+}
+
+String URLEscape() #void:
+{Token t;}
+{
+  t=< PERCENT_URL > {return t.image;}
+}
+
+String HostNumber() #void:
+{int s1;
+ Token t1;
+ int s2;
+ Token t2;
+ int s3;
+ Token t3;
+ int s4;}
+{
+  s1=Digits() t1=< PERIOD_URL > s2=Digits() t2=< PERIOD_URL > s3=Digits() t3=< PERIOD_URL > s4=Digits()
+  {StringBuilder sb = new StringBuilder();
+   sb.append(s1);
+   sb.append(t1);
+   sb.append(s2);
+   sb.append(t2);
+   sb.append(s3);
+   sb.append(t3);
+   sb.append(s4);
+   return sb.toString();}
+}
+
+int Digits() #void:
+{Token t;
+ StringBuilder sb = new StringBuilder();}
+{
+  (
+    t=< DIGIT > {sb.append(t.image);}
+  )+
+  {return Integer.parseInt(sb.toString());}
+}  
+
+int Port() #void:
+{int s;}
+{
+  s=Digits() {return s;}
+}
+
+String URLPath() #void:
+{StringBuilder sb = new StringBuilder();
+ String s1;
+ Token t;
+ String s2;}
+{
+  [s1=URLSegment() {sb.append(s1);} [ t=< SLASH_URL > s2=URLPath() {sb.append(t.image); sb.append(s2);} ]]
+  {return sb.toString();}
+}
+
+String URLSegment() #void:
+{String s;}
+{
+  s=URLXAlphas() {return s;}
+}
+
+String URLSearch() #void:
+{String s;}
+{
+  s=URLXAlphas() {return s;}
+}
+
+void OXPathPathSegment() #RelativeOXPathLocationPath://#OXPathPathSegment(>1)://Adapted in part from the grammar in http://www.w3.org/TR/xpath/, adapted to be LL(1)
+{}
+{//don't support relative location paths for start
+  ComplexOXPathStepPath() {jjtThis.setHasComplexPath(true);}
+| SimpleOXPathStepPath() {jjtThis.setHasSimplePath(true);}  [ComplexOXPathStepPath() {jjtThis.setHasComplexPath(true);}]  
+| SimpleOXPathStepTail() {jjtThis.setIsAbsolutePath(true); jjtThis.setHasSimplePath(true);} [ComplexOXPathStepPath() {jjtThis.setHasComplexPath(true);}] 
+//| RelativeOXPathLocationTail() {jjtThis.setIsAbsoluteNavigation(true);} 
+}
+
+void RelativeOXPathLocationPath() :
+{}{
+  ComplexOXPathStepPath() {jjtThis.setHasComplexPath(true);}
+| SimpleOXPathStepPath() {jjtThis.setHasSimplePath(true);}  [ComplexOXPathStepPath() {jjtThis.setHasComplexPath(true);}] }
+
+void SimpleOXPathStepTail() #void:
+{}
+{  < SLASH > SimpleOXPathStepPath()
+| SimpleOXPathDOSStepPath()
+{}
+}
+
+void SimpleOXPathDOSStepPath() #SimpleOXPathStepPath:
+{}
+{  DescendantOrSelfShort() SimpleOXPathStepPath()
+  {jjtThis.setStep(new OXPathStep(ForwardAxis.DESCENDANTORSELF,XPathNameTest.WILDCARD));
+   jjtThis.setHasList(true);
+   }
+}
+
+void ComplexOXPathStepPath() #void :
+{}
+{  OXPathKleeneStarPath()
+| OXPathActionPath()
+}
+
+void DescendantOrSelfShort() #void:
+{}
+{
+  < DESCENDENT_OR_SELF_SHORT > 
+}
+
+
+void OXPathKleeneStarPath() :
+{
+ ArrayList<Integer> list;}
+{
+  //Overload the Multiply operator for Kleene star
+  < BEGIN_KLEENE_STAR >   OXPathPathSegment() < CLOSE_PARAN >
+  (
+    < MULTIPLY > {jjtThis.setHasLowerBound(false);jjtThis.setHasUpperBound(false);} |
+    (      < BEGIN_BOUNDED_KLEENE_STAR_PRED > list=OXPathKleeneStarPredicate() < CLOSE_CURLY >
+      {if (list.size()>1)      	{jjtThis.setHasLowerBound(true);
+      	 jjtThis.setHasUpperBound(true);
+      	 jjtThis.setLowerBound(list.get(0));
+      	 jjtThis.setUpperBound(list.get(1));}       else {jjtThis.setHasLowerBound(true); jjtThis.setHasUpperBound(false); jjtThis.setLowerBound(list.get(0));}      }
+    )
+  )
+  
+  [ RelativeOXPathLocationTail() {jjtThis.setHasFollowingPath(true);} ]
+  
+}
+
+ArrayList<Integer> OXPathKleeneStarPredicate() #void:
+{ArrayList<Integer> result = new ArrayList<Integer>();
+ int i1;
+ int i2;}
+{
+  i1=OXPathKleeneStarPredicateArg() {result.add(i1);}
+  [ <COMMA >
+     i2=OXPathKleeneStarPredicateArg() {result.add(i2);} ]
+  {return result;}
+}
+
+int OXPathKleeneStarPredicateArg() #void:
+{Token t;}
+{
+  t=< DIGITS >
+  {return Integer.parseInt(t.image);}
+}
+
+void OXPathActionPath() :
+{Action action;}
+{
+	action=OXPathAction() {jjtThis.setAction(action);}
+	[ RelativeOXPathLocationTail()   {jjtThis.setHasTail(true);}]  
+}
+
+void RelativeOXPathLocationTail() #void:
+{}
+{ ComplexOXPathStepPath()| < SLASH > RelativeOXPathLocationPath()
+| AbbreviatedAbsoluteOXPathLocationPath()
+}
+
+
+void SimpleOXPathStepPath() :
+{Step step;}
+{
+  (
+    step=FullStep()
+  | step=AbbreviatedStep()
+  ) {jjtThis.setStep(step);}
+  [OXPathPostStepList() {jjtThis.setHasList(true);}]
+}
+
+Step FullStep() #void:
+{Axis axis = ForwardAxis.CHILD;//default unless overwritten
+ NodeTest nodetest;}
+{  [ ( axis=XPathForwardAxisName() 
+    | axis=XPathBackwardAxisName()
+    | axis=XPathAbbreviatedAxisSpecifier()
+    | axis=OXPathAxisSpecifier()
+    )
+  ]
+    ( nodetest=XPathNodeTest() | nodetest=OXPathNodeTest() )  {return new OXPathStep(axis,nodetest);}
+}
+
+
+void OXPathPostStepList() #void:
+{}
+{
+  SimpleOXPathStepTail()| OXPathNodeTestOp()
+| XPathPredicate()
+| OXPathOptionalPredicate()
+| OXPathExtractionMarker()
+}
+
+Axis OXPathAxisSpecifier() #void:
+{Axis a;}
+{
+  a=OXPathAxisName() {return a;}
+}
+
+Axis XPathForwardAxisName() #void:
+{}
+{  < ATTRIBUTE > {return ForwardAxis.ATTRIBUTE;}
+| < CHILD > {return ForwardAxis.CHILD;}
+| < DESCENDANTORSELF > {return ForwardAxis.DESCENDANTORSELF;}
+| < DESCENDANT > {return ForwardAxis.DESCENDANT;}
+| < FOLLOWINGSIBLING > {return ForwardAxis.FOLLOWINGSIBLING;}
+| < FOLLOWING > {return ForwardAxis.FOLLOWING;}
+| < NAMESPACE > {return ForwardAxis.NAMESPACE;}
+| < SELF > {return ForwardAxis.SELF;}
+}
+
+Axis XPathBackwardAxisName() #void:
+{}
+{
+  < ANCESTORORSELF > {return BackwardAxis.ANCESTORORSELF;}
+| < ANCESTOR > {return BackwardAxis.ANCESTOR;}
+| < PARENT > {return BackwardAxis.PARENT;}
+| < PRECEDINGSIBLING > {return BackwardAxis.PRECEDINGSIBLING;}
+| < PRECEDING > {return BackwardAxis.PRECEDING;}
+}
+
+Axis OXPathAxisName() #void:
+{}
+{
+  < STYLE > {return OXPathAxis.STYLE;}
+}
+
+
+Axis XPathAbbreviatedAxisSpecifier() #void:
+{}
+{
+  < AT > {return AbbreviatedAxis.AT;}
+}
+
+NodeTest XPathNodeTest() #void:
+{NodeTest nt;
+ String parameter = "";}
+{
+  nt=XPathNameTest() {return nt;}
+| < COMMENT > < CLOSE_PARAN > {return XPathNodeTest.COMMENT;}
+| < TEXT > < CLOSE_PARAN > {return XPathNodeTest.TEXT;} 
+| < PROCESSING_INSTRUCTION > [parameter=XPathLiteral(false)] < CLOSE_PARAN > {return (parameter.equals(""))?XPathNodeTest.PROCESSINGINSTRUCTION:new ParameterizedProcessingInstruction(parameter);}
+| < NODE > < CLOSE_PARAN > {return XPathNodeTest.NODE;}
+}
+
+
+
+NodeTest OXPathNodeTest() #void:
+{NodeTest nodetest;}
+{
+  ( < FIELD > {nodetest=OXPathNodeTest.FIELD;} | < ANY_FIELD > {nodetest=OXPathNodeTest.ANYFIELD;} )
+  <CLOSE_PARAN >
+  {return nodetest;}
+}
+
+void OXPathNodeTestOp() :
+{Selector select;
+ Token value;}
+{
+  select=OXPathNodeTestOper() value=< NCNAME > {jjtThis.setSelectorPredicate(new SelectorPredicate(select,value.image));}
+  [OXPathPostStepList() {jjtThis.setHasList(true);}]
+}
+
+Selector OXPathNodeTestOper() #void:
+{}
+{
+  < PERIOD_OP > {return Selector.CLASS;}
+| < HASH > {return Selector.ID;}
+}
+
+
+XPathNameTest XPathNameTest() #void:
+{Token tp;
+ Token ts;
+ NodeTest nt;}
+{
+  ts=< WILDCARD > {return new XPathNameTest(ts.image,true);}
+| tp=< NCNAME >
+  [ < COLON >
+  ( ts=< WILDCARD > {return new XPathNameTest(tp.image,ts.image,true);}
+  | ts=< NCNAME > {return new XPathNameTest(tp.image,ts.image,false);} ) ]
+  {return new XPathNameTest(tp.image,false);}
+}
+
+String XPathLiteral(boolean node) #XPathLiteral(node):
+{Token t;}
+{
+  ( t = < DOUBLE_QUOTE_STRING_PATH > {jjtThis.setValue(t.image); return jjtThis.getValue();} )  	                                       
+  |
+  ( t = < SINGLE_QUOTE_STRING_PATH > {jjtThis.setValue(t.image); return jjtThis.getValue();} )
+}
+
+void XPathPredicate() :
+{}
+{
+  < OPEN_BRACKET > XPathExpr() < CLOSE_BRACKET >
+
+  [OXPathPostStepList() {jjtThis.setHasList(true);}]
+  
+}
+
+void OXPathOptionalPredicate() #XPathPredicate :
+{}
+{
+  < OPEN_OPTIONAL > {jjtThis.setIsOptional(true);} XPathExpr() < CLOSE_BRACKET >
+
+  [OXPathPostStepList() {jjtThis.setHasList(true);}]
+}
+
+Action OXPathAction() #void:
+{Action a;}
+{
+  (    a=OXPathURLAction() | a=OXPathUserAction()
+  )
+  {return a;}
+}
+
+Action OXPathURLAction() #void:
+{Action a;
+ String s;
+ long l;}
+{
+  < BEGIN_URL_IN_PATH > s=URLName() < END_URL_IN_PATH >
+  {a= new URLAction(s);}
+  [l=OXPathActionPred() {a.setWait(l);} ]
+  < SLASH > < CLOSE_CURLY >
+| < DOC_BEGIN > s=XPathLiteral(false) 
+  {a= new URLAction(s);}
+  [< COMMA > l=OXPathActionPred() {a.setWait(l);}]
+  < CLOSE_PARAN >
+  {return a;}
+}
+
+
+Action OXPathUserAction() #void:
+{Action a;
+ long l;}
+{
+  < BEGIN_USER_ACTION >
+  ( a=GroundedOXPathActionPosition()
+  | a=GroundedOXPathActionExplicit()
+  | a=OXPathActionKeyword()
+  | a=OXPathActionVariable()) 
+  [ l=OXPathActionPred() {a.setWait(l);} ]
+  [ OXPathAbsoluteActionSignal() {a.setIsAbsoluteAction(true);} ]
+  < CLOSE_CURLY >
+  {return a;}
+}
+
+long OXPathActionPred() #void:
+{long wait;}
+{
+  < OPEN_BRACKET > wait=OXPathActionWaitPred() < CLOSE_BRACKET > {return wait;}
+}
+
+long OXPathActionWaitPred() #void:
+{Token wait;}
+{
+  < WAIT > wait=< DIGITS >
+  {return Long.parseLong(wait.image);}
+}
+
+void OXPathAbsoluteActionSignal() #void:
+{}
+{
+  < SLASH >
+}
+
+Action GroundedOXPathActionPosition() #void:
+{Token t;}
+{
+  t=< DIGITS > {return new PositionAction(Integer.parseInt(t.image));}
+}
+
+Action GroundedOXPathActionExplicit() #void:
+{String s;}
+{
+  s=XPathLiteral(false) {return new ExplicitAction(s);}
+}
+
+Action OXPathActionKeyword() #void:
+{Token t;}
+{
+  t=< FOCUS > {return new KeywordAction(ActionKeywords.FOCUS);} 
+| t=< CLICK > {return new KeywordAction(ActionKeywords.CLICK);}
+| t=< DBLCLICK > {return new KeywordAction(ActionKeywords.DBLCLICK);}
+| t=< MOUSEDOWN > {return new KeywordAction(ActionKeywords.MOUSEDOWN);}
+| t=< MOUSEENTER > {return new KeywordAction(ActionKeywords.MOUSEENTER);}
+| t=< MOUSEMOVE > {return new KeywordAction(ActionKeywords.MOUSEMOVE);}
+| t=< MOUSEOVER > {return new KeywordAction(ActionKeywords.MOUSEOVER);}
+| t=< MOUSEOUT > {return new KeywordAction(ActionKeywords.MOUSEOUT);}
+| t=< MOUSEUP > {return new KeywordAction(ActionKeywords.MOUSEUP);}
+| t=< WHEEL > {return new KeywordAction(ActionKeywords.WHEEL);}
+| t=< SUBMIT > {return new KeywordAction(ActionKeywords.SUBMIT);}
+| t=< CHECK > {return new KeywordAction(ActionKeywords.CHECK);}
+| t=< UNCHECK > {return new KeywordAction(ActionKeywords.UNCHECK);}
+}
+
+Action OXPathActionVariable() #void:
+{Token t;}
+{
+  t=< VARIABLE > {return new VariableAction(t.image);}
+}
+
+void OXPathExtractionMarker() :
+{String s;
+ boolean isAttribute = false;}
+{
+  < BEGIN_EXTRACT_MARK >
+  s=OXPathExtractionName() 
+  [ < EQUALS > OXPathExtractionValue() {isAttribute = true;} ]
+  (< END_EXTRACT_MARK > | < GREATER >) //We overload ">" so we don't have to overly generalize the greater operator
+  {jjtThis.setExtractionMarker(new OXPathExtractionMarker(s,isAttribute));}
+
+   [OXPathPostStepList() {jjtThis.setHasList(true);}]
+}
+
+String OXPathExtractionName() #void:
+{Token t;}
+{
+  t=< NCNAME > {return t.image;}
+}
+
+void OXPathExtractionValue() #void:
+{}
+{
+  XPathPrimaryExpr()
+}
+
+
+void XPathExpr() #void:
+{}
+{
+  XPathOrExpr()
+}
+
+void XPathOrExpr() #BinaryOpExpr(>1):
+{}
+{
+  XPathAndExpr() [ < OR > {jjtThis.setBinaryOperator(HigherLevelOp.OR);} XPathOrExpr() ]
+}
+
+void XPathAndExpr() #BinaryOpExpr(>1):
+{}
+{
+  XPathEqualityExpr() [ < AND > {jjtThis.setBinaryOperator(HigherLevelOp.AND);} XPathAndExpr() ]
+}
+
+void XPathEqualityExpr() #BinaryOpExpr(>1):
+{EqualityExprOp op;}
+{
+  XPathRelationalExpr()
+  [  op=XPathEqualityExprOp() {jjtThis.setBinaryOperator(op);}
+     XPathEqualityExpr() ]
+}
+
+EqualityExprOp XPathEqualityExprOp() #void:
+{}
+{
+  < EQUALS > {return EqualityExprOp.EQUALS;}
+| < NOTEQUAL > {return EqualityExprOp.NOTEQUAL;}
+| < WORD_TEST >  {return EqualityExprOp.WORDTEST;}
+| < CONTAINS >  {return EqualityExprOp.CONTAINS;}
+}
+
+
+void XPathRelationalExpr() #BinaryOpExpr(>1):
+{RelationalExprOp op;}
+{//here, right-associative, rather than left-associative in XPath standard
+  XPathAdditiveExpr()
+  [ op=XPathRelationalExprOp() {jjtThis.setBinaryOperator(op);}
+    XPathRelationalExpr() ]
+}
+
+RelationalExprOp XPathRelationalExprOp() #void:
+{}
+{
+  < GREATER > {return RelationalExprOp.GREATER;}
+| < LESS > {return RelationalExprOp.LESS;}
+| < GREATERTE > {return RelationalExprOp.GREATERTE;}
+| < LESSTE > {return RelationalExprOp.LESSTE;}
+}
+
+void XPathAdditiveExpr() #BinaryOpExpr(>1):
+{AdditiveExprOp op;}
+{
+  XPathMultiplicativeExpr()
+  [ op=AdditiveExprOp() {jjtThis.setBinaryOperator(op);}
+     XPathAdditiveExpr() ]
+}
+
+AdditiveExprOp AdditiveExprOp() #void:
+{}
+{
+  < PLUS > {return AdditiveExprOp.PLUS;}
+| < MINUS > {return AdditiveExprOp.MINUS;} 
+}
+
+void XPathMultiplicativeExpr() #BinaryOpExpr(>1):
+{MultiplicativeExprOp op;}
+{
+  XPathUnaryExpr()
+  [ op=MultiplicativeExprOp() {jjtThis.setBinaryOperator(op);}
+    XPathMultiplicativeExpr() ]
+}
+
+MultiplicativeExprOp MultiplicativeExprOp() #void:
+{}
+{
+  < MULTIPLY > {return MultiplicativeExprOp.MULTIPLY;}
+| < DIV > {return MultiplicativeExprOp.DIV;}
+| < MOD > {return MultiplicativeExprOp.MOD;}
+}
+
+void XPathUnaryExpr() #XPathUnaryExpr(hasOp):
+{boolean hasOp = false;}
+{
+  ( XPathUnaryExprOp() {jjtThis.incrementOperatorNumber(); hasOp=true;} )* XPathUnionExpr()
+}
+
+void XPathUnaryExprOp() #void:
+{}
+{
+  < NEGATIVE > 
+}
+
+void XPathPrimaryExpr() #XPathPrimaryExpr(parans):
+{boolean parans = false;}
+{
+  < OPEN_PARAN > {parans=true;} XPathExpr() < CLOSE_PARAN >  
+| XPathLiteral(true) 
+| XPathNumber() 
+| XPathFunctionCall()
+}
+
+double XPathNumber() :
+{Token t;}
+{
+  t=< NUMBER > {jjtThis.setValue(Double.parseDouble(t.image)); return jjtThis.getValue();}
+| t=< DIGITS > {jjtThis.setValue(Double.parseDouble(t.image)); return jjtThis.getValue();}
+}
+
+void XPathFunctionCall() :
+{XPathFunction function;}
+{
+  function=XPathFunctionCallName() {jjtThis.setFunction(function);}
+  [ XPathArgument() {jjtThis.addParameter();} ( < COMMA > XPathArgument() {jjtThis.addParameter();} )* ]
+  < CLOSE_PARAN >
+}
+
+XPathFunction XPathFunctionCallName() #void:
+{Token t;}
+{
+  < POSITION > {return XPathFunctions.POSITION;}
+| < LAST > {return XPathFunctions.LAST;} 
+| < COUNT > {return XPathFunctions.COUNT;}
+| < ID > {return XPathFunctions.ID;}
+| < NAMESPACEURI > {return XPathFunctions.NAMESPACEURI;}
+| < LOCALNAME > {return XPathFunctions.LOCALNAME;}
+| < NAME > {return XPathFunctions.NAME;}
+| < STRING > {return XPathFunctions.STRING;}
+| < CONCAT > {return XPathFunctions.CONCAT;}
+| < STARTSWITH > {return XPathFunctions.STARTSWITH;}
+| < CONTAINSFUNC > {return XPathFunctions.CONTAINS;}
+| < SUBSTRINGBEFORE > {return XPathFunctions.SUBSTRINGBEFORE;}
+| < SUBSTRINGAFTER > {return XPathFunctions.SUBSTRINGAFTER;}
+| < SUBSTRING > {return XPathFunctions.SUBSTRING;}
+| < SUBSTRINGLENGTH >  {return XPathFunctions.SUBSTRINGLENGTH;}
+| < NORMALIZESPACE > {return XPathFunctions.NORMALIZESPACE;}
+| < TRANSLATE > {return XPathFunctions.TRANSLATE;}
+| < BOOLEAN > {return XPathFunctions.BOOLEAN;}
+| < NOT > {return XPathFunctions.NOT;}
+| < TRUE > {return XPathFunctions.TRUE;}
+| < FALSE > {return XPathFunctions.FALSE;}
+| < LANG > {return XPathFunctions.LANG;}
+| < NUMBERFUNC > {return XPathFunctions.NUMBER;}
+| < SUM > {return XPathFunctions.SUM;}
+| < FLOOR > {return XPathFunctions.FLOOR;}
+| < CEILING > {return XPathFunctions.CEILING;}
+| < ROUND > {return XPathFunctions.ROUND;}
+}
+
+
+void XPathArgument() #void:
+{}
+{
+  XPathExpr() 
+}
+
+void XPathUnionExpr() #BinaryOpExpr(>1):
+{}
+{
+  XPathPathExpr() [ < UNION >  {jjtThis.setBinaryOperator(HigherLevelOp.UNION);} XPathUnionExpr() ]
+}
+
+// * The WARNING generated by the ambiguity in this rule is purposeful; the default (first rule condition satisfied) is what we always want.
+// * This is because we restrict Kleene-Stars that begin with path expressions to start with / or // (in this way, no relative expressions can start with Kleene stars).
+// * This restriction is necessary so as to save arbitrary lookahead as an entire unbounded relative OXPath expression must be parsed to determine if an operator and new expression occur afterwards.
+// * This restriction results in no loss of expressivity.  Simply use ./(Kleene-star-expr)* in order to preserve context.
+// * We treat the additional OXPath "step" feature - user actions - similiarly.
+// * The LOOKAHEAD(1) is to simply suppress the warning; lets JavaCC know that the ambiguity was a deliberate choice.
+void XPathPathExpr() #XPathPathExpr(>1):
+{}
+{//incorporates the filter expression (first line conditional path of the production rule)
+ LOOKAHEAD(1)
+   XPathPrimaryExpr() [ OXPathPostStepList() {jjtThis.setHasSimpleList(true);} ] [ ComplexOXPathStepPath() {jjtThis.setHasComplexList(true);}]
+|  OXPathPathSegment() 
+}
+
+//here, we restrict the Complex steps similiarly so that //ComplexOXPathStepPath isn't possible.
+//as with the restriction of the relative OXPath location path beginning with a complex step, this restriction
+//makes a cleaner semantics, a much more efficient parser (we remain at LL(1)), and no loss of expressivity (as
+//this can be simulated with //*/ComplexOXPathStepPath
+void AbbreviatedAbsoluteOXPathLocationPath() #RelativeOXPathLocationPath:
+{}
+{
+  SimpleOXPathDOSStepPath() {jjtThis.setHasSimplePath(true);}
+  [ComplexOXPathStepPath() {jjtThis.setHasComplexPath(true);}]
+}
+
+Step AbbreviatedStep() #void:
+{Step s;}
+{
+(    s=AbbreviatedSelfStep()
+  | s=AbbreviatedParentStep()
+)
+{return s;}
+}
+
+Step AbbreviatedSelfStep() #void:
+{}
+{  < PERIOD > {return AbbreviatedStep.SELF;}
+}
+
+Step AbbreviatedParentStep() #void:
+{}
+{  < PARENT_SHORT > {return AbbreviatedStep.PARENT;}
+}
