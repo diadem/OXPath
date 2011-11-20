@@ -70,9 +70,9 @@ public enum OXPathNodeTest implements NodeTest {
 	public OXPathType evaluate(OXPathContextNode node, Axis axis) throws OXPathException{
 		if (!(axis.getType().equals(AxisType.FORWARD) || axis.getType().equals(AxisType.BACKWARD) ))
 			throw new OXPathException("Incompatible axis with OXPath node test");
-		OXPathNodeList<OXPathContextNode> result = new OXPathNodeList<OXPathContextNode>();
+		OXPathNodeList result = new OXPathNodeList();
 		for (NodeTestFields field : NodeTestFields.values()) {
-			OXPathNodeList<OXPathContextNode> tempResult = node.getByXPath(axis.getValue()+field.getValue()).nodeList();
+			OXPathNodeList tempResult = node.getByXPath(axis.getValue()+field.getValue(),true,true).nodeList();
 			for (OXPathContextNode tempNode : tempResult) {
 				if ((tempNode.getNode().isVisible()) || this.equals(ANYFIELD)) result.add(tempNode);
 			}

@@ -29,6 +29,8 @@
  */
 package uk.ac.ox.comlab.diadem.oxpath.core;
 
+import java.util.Iterator;
+
 import diadem.common.web.dom.DOMDocument;
 import diadem.common.web.dom.DOMNode;
 import uk.ac.ox.comlab.diadem.oxpath.core.extraction.Extractor;
@@ -38,7 +40,6 @@ import uk.ac.ox.comlab.diadem.oxpath.core.state.PAATStateEvalSet;
 import uk.ac.ox.comlab.diadem.oxpath.model.OXPathContextNode;
 import uk.ac.ox.comlab.diadem.oxpath.model.OXPathNodeList;
 import uk.ac.ox.comlab.diadem.oxpath.model.OXPathType;
-import uk.ac.ox.comlab.diadem.oxpath.model.language.AxisType;
 import uk.ac.ox.comlab.diadem.oxpath.model.language.OXPathExtractionMarker;
 import uk.ac.ox.comlab.diadem.oxpath.parser.ast.ASTBinaryOpExpr;
 import uk.ac.ox.comlab.diadem.oxpath.parser.ast.ASTExpression;
@@ -132,12 +133,13 @@ public class PAATEval_Visitor extends OXPathVisitorGenericAdaptor<PAATStateEvalI
 		OXPathType newContext = data.getContextNode().getByOXPath(node.getStep());
 		//immediately return if no results or no further path
 		if (newContext.nodeList().isEmpty() || !node.hasList()) return newContext;
-		OXPathNodeList<OXPathContextNode> result = new OXPathNodeList<OXPathContextNode>();
+		OXPathNodeList result = new OXPathNodeList();
 		//we apply PAAT eval_ as normal
 		if (node.getSetBasedEval().equals(PositionFuncEnum.NEITHER)) {
-			for (int i = 0; i < newContext.nodeList().size(); i++) {
-				OXPathContextNode c = newContext.nodeList().get(i);
-				boolean newProtect = (i==(newContext.nodeList().size()-1))?data.isDocumentProtected():true;
+			Iterator<OXPathContextNode> iterator = newContext.nodeList().iterator();
+			while (iterator.hasNext()) {
+				OXPathContextNode c = iterator.next();
+				boolean newProtect = (iterator.hasNext())?true:data.isDocumentProtected();
 				PAATStateEvalIterative newState = new PAATState.Builder(data).setContextNode(c)
 				.setDocumentProtect(newProtect).buildNode();
 				result.addAll(this.paatSet.eval_(c.getNode(), node.jjtGetChild(0), 
@@ -146,9 +148,8 @@ public class PAATEval_Visitor extends OXPathVisitorGenericAdaptor<PAATStateEvalI
 		}
 		//otherwise, we take a set based approach
 		else {
-			//JavaScript returns unsorted lists - We move the sorting here (this is the only time we need to do this because of position() and last())
-			if (node.getStep().getAxis().getType().equals(AxisType.BACKWARD)) newContext.nodeList().sortReverseOrder();
-			else newContext.nodeList().sortForwardOrder();
+//			//JavaScript returns unsorted lists - We move the sorting here (this is the only time we need to do this because of position() and last())
+//			if (node.getStep().getAxis().getType().equals(AxisType.BACKWARD)) newContext.nodeList().sortReverseOrder();
 			PAATStateEvalSet newState = new PAATState.Builder(data).setContextSet(newContext.nodeList()).buildSet();
 			result.addAll(this.paatSet.accept(node.jjtGetChild(0), newState).nodeList());
 		}
@@ -225,7 +226,7 @@ public class PAATEval_Visitor extends OXPathVisitorGenericAdaptor<PAATStateEvalI
 		OXPathContextNode context = data.getContextNode();
 		
 		PAATStateEvalSet predState = new PAATState.Builder(data).setPosition(0).setLast(0).setDocumentProtect((node.hasList())?true:data.isDocumentProtected())
-											.setContextSet(new OXPathNodeList<OXPathContextNode>(new OXPathContextNode(context.getNode(),context.getLast(),context.getLast())))
+											.setContextSet(new OXPathNodeList(new OXPathContextNode(context.getNode(),context.getLast(),context.getLast())))
 											.setDocumentProtect((node.hasList())?true:data.isDocumentProtected()).buildSet();
 		OXPathType predResult = this.paatSet.accept(node.jjtGetChild(0), predState);
 		if(!predResult.booleanValue() && !node.isOptional()) return OXPathType.EMPTYRESULT;
@@ -252,7 +253,7 @@ public class PAATEval_Visitor extends OXPathVisitorGenericAdaptor<PAATStateEvalI
 		int numChild = 0;
 		int newLastSibling;
 		if (marker.isAttribute()) {
-			PAATStateEvalSet newState = new PAATState.Builder(data).setContextSet(new OXPathNodeList<OXPathContextNode>(context))
+			PAATStateEvalSet newState = new PAATState.Builder(data).setContextSet(new OXPathNodeList(context))
 					.setDocumentProtect((node.hasList())?true:data.isDocumentProtected()).buildSet();
 			newLastSibling = this.extractor.extractNode(context.getNode(), marker.getLabel(),context.getParent(),
 					this.paatSet.accept(node.jjtGetChild(numChild++), newState).toPrettyHtml());

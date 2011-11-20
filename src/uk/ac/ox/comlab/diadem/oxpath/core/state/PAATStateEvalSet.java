@@ -29,7 +29,6 @@
  */
 package uk.ac.ox.comlab.diadem.oxpath.core.state;
 
-import uk.ac.ox.comlab.diadem.oxpath.model.OXPathContextNode;
 import uk.ac.ox.comlab.diadem.oxpath.model.OXPathNodeList;
 
 /**
@@ -47,7 +46,7 @@ public class PAATStateEvalSet extends PAATState{
 	 * @param higher number of Kleene-star iterations to perform
 	 * @param currAction the identifier for the current action being processed
 	 */
-	protected PAATStateEvalSet(Builder builder, OXPathNodeList<OXPathContextNode> c, int numHigher, int currAction) {
+	protected PAATStateEvalSet(Builder builder, OXPathNodeList c, int numHigher, int currAction) {
 		super(builder);
 		this.context = c;
 		this.higher = numHigher;
@@ -58,7 +57,7 @@ public class PAATStateEvalSet extends PAATState{
 	 * Returns context at c.  We don't make a defensive copy here, so be careful.
 	 * @return context current context (a set or a node depending on evaluation pattern)
 	 */
-	public OXPathNodeList<OXPathContextNode> getContextSet() {
+	public OXPathNodeList getContextSet() {
 		return context;
 	}
 	
@@ -89,7 +88,7 @@ public class PAATStateEvalSet extends PAATState{
 	/**
 	 * context at current "step" in query
 	 */
-	private final OXPathNodeList<OXPathContextNode> context;
+	private final OXPathNodeList context;
 	
 	/**
 	 * number of Kleene star iterations to perform (communicated by outer Kleene to inner action)

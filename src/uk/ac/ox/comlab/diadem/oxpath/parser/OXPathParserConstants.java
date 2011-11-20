@@ -49,189 +49,189 @@ public interface OXPathParserConstants {
   /** RegularExpression Id. */
   int UNCHECK = 19;
   /** RegularExpression Id. */
-  int END_URL_IN_PATH = 20;
+  int VARIABLE = 20;
   /** RegularExpression Id. */
-  int END_URL = 21;
+  int END_URL_IN_PATH = 21;
   /** RegularExpression Id. */
-  int SLASH_URL = 22;
+  int END_URL = 22;
   /** RegularExpression Id. */
-  int QUESTION_URL = 23;
+  int SLASH_URL = 23;
   /** RegularExpression Id. */
-  int MINUS_URL = 24;
+  int QUESTION_URL = 24;
   /** RegularExpression Id. */
-  int UNDERSCORE_URL = 25;
+  int MINUS_URL = 25;
   /** RegularExpression Id. */
-  int PERIOD_URL = 26;
+  int UNDERSCORE_URL = 26;
   /** RegularExpression Id. */
-  int AMPERSAND_URL = 27;
+  int PERIOD_URL = 27;
   /** RegularExpression Id. */
-  int EQUALS_URL = 28;
+  int AMPERSAND_URL = 28;
   /** RegularExpression Id. */
-  int DOLLAR_URL = 29;
+  int EQUALS_URL = 29;
   /** RegularExpression Id. */
-  int PERCENT_URL = 30;
+  int DOLLAR_URL = 30;
   /** RegularExpression Id. */
-  int AT_URL = 31;
+  int PERCENT_URL = 31;
   /** RegularExpression Id. */
-  int PLUS_URL = 32;
+  int AT_URL = 32;
   /** RegularExpression Id. */
-  int EXCLAIMATION_URL = 33;
+  int PLUS_URL = 33;
   /** RegularExpression Id. */
-  int STAR_URL = 34;
+  int EXCLAIMATION_URL = 34;
   /** RegularExpression Id. */
-  int OPEN_PARAN_URL = 35;
+  int STAR_URL = 35;
   /** RegularExpression Id. */
-  int CLOSE_PARAN_URL = 36;
+  int OPEN_PARAN_URL = 36;
   /** RegularExpression Id. */
-  int COMMA_URL = 37;
+  int CLOSE_PARAN_URL = 37;
   /** RegularExpression Id. */
-  int LOWER_ALPHA = 38;
+  int COMMA_URL = 38;
   /** RegularExpression Id. */
-  int UPPER_ALPHA = 39;
+  int LOWER_ALPHA = 39;
   /** RegularExpression Id. */
-  int DIGIT = 40;
+  int UPPER_ALPHA = 40;
   /** RegularExpression Id. */
-  int ENDLINE = 41;
+  int DIGIT = 41;
   /** RegularExpression Id. */
-  int EQUALS_DEFAULT = 42;
+  int ENDLINE = 42;
   /** RegularExpression Id. */
-  int DOC_BEGIN = 43;
+  int EQUALS_DEFAULT = 43;
   /** RegularExpression Id. */
-  int OPEN_PARAN = 44;
+  int DOC_BEGIN = 44;
   /** RegularExpression Id. */
-  int CLOSE_PARAN = 45;
+  int OPEN_PARAN = 45;
   /** RegularExpression Id. */
-  int OPEN_OPTIONAL = 46;
+  int CLOSE_PARAN = 46;
   /** RegularExpression Id. */
-  int OPEN_BRACKET = 47;
+  int OPEN_OPTIONAL = 47;
   /** RegularExpression Id. */
-  int CLOSE_BRACKET = 48;
+  int OPEN_BRACKET = 48;
   /** RegularExpression Id. */
-  int BEGIN_URL_IN_PATH = 49;
+  int CLOSE_BRACKET = 49;
   /** RegularExpression Id. */
-  int OPEN_CURLY = 50;
+  int BEGIN_URL_IN_PATH = 50;
   /** RegularExpression Id. */
-  int CLOSE_CURLY = 51;
+  int OPEN_CURLY = 51;
   /** RegularExpression Id. */
-  int COMMA = 52;
+  int CLOSE_CURLY = 52;
   /** RegularExpression Id. */
-  int NUMBER = 53;
+  int COMMA = 53;
   /** RegularExpression Id. */
-  int DESCENDENT_OR_SELF_SHORT = 54;
+  int NUMBER = 54;
   /** RegularExpression Id. */
-  int BEGIN_USER_ACTION = 55;
+  int DESCENDENT_OR_SELF_SHORT = 55;
   /** RegularExpression Id. */
-  int BEGIN_KLEENE_STAR = 56;
+  int BEGIN_USER_ACTION = 56;
   /** RegularExpression Id. */
-  int BEGIN_BOUNDED_KLEENE_STAR_PRED = 57;
+  int BEGIN_KLEENE_STAR = 57;
   /** RegularExpression Id. */
-  int SLASH = 58;
+  int BEGIN_BOUNDED_KLEENE_STAR_PRED = 58;
   /** RegularExpression Id. */
-  int BEGIN_EXTRACT_MARK = 59;
+  int SLASH = 59;
   /** RegularExpression Id. */
-  int STYLE = 60;
+  int BEGIN_EXTRACT_MARK = 60;
   /** RegularExpression Id. */
-  int ATTRIBUTE = 61;
+  int STYLE = 61;
   /** RegularExpression Id. */
-  int CHILD = 62;
+  int ATTRIBUTE = 62;
   /** RegularExpression Id. */
-  int DESCENDANTORSELF = 63;
+  int CHILD = 63;
   /** RegularExpression Id. */
-  int DESCENDANT = 64;
+  int DESCENDANTORSELF = 64;
   /** RegularExpression Id. */
-  int FOLLOWINGSIBLING = 65;
+  int DESCENDANT = 65;
   /** RegularExpression Id. */
-  int FOLLOWING = 66;
+  int FOLLOWINGSIBLING = 66;
   /** RegularExpression Id. */
-  int NAMESPACE = 67;
+  int FOLLOWING = 67;
   /** RegularExpression Id. */
-  int SELF = 68;
+  int NAMESPACE = 68;
   /** RegularExpression Id. */
-  int ANCESTORORSELF = 69;
+  int SELF = 69;
   /** RegularExpression Id. */
-  int ANCESTOR = 70;
+  int ANCESTORORSELF = 70;
   /** RegularExpression Id. */
-  int PARENT = 71;
+  int ANCESTOR = 71;
   /** RegularExpression Id. */
-  int PRECEDINGSIBLING = 72;
+  int PARENT = 72;
   /** RegularExpression Id. */
-  int PRECEDING = 73;
+  int PRECEDINGSIBLING = 73;
   /** RegularExpression Id. */
-  int AXIS = 74;
+  int PRECEDING = 74;
   /** RegularExpression Id. */
-  int COMMENT = 75;
+  int AXIS = 75;
   /** RegularExpression Id. */
-  int TEXT = 76;
+  int COMMENT = 76;
   /** RegularExpression Id. */
-  int PROCESSING_INSTRUCTION = 77;
+  int TEXT = 77;
   /** RegularExpression Id. */
-  int NODE = 78;
+  int PROCESSING_INSTRUCTION = 78;
   /** RegularExpression Id. */
-  int FIELD = 79;
+  int NODE = 79;
   /** RegularExpression Id. */
-  int ANY_FIELD = 80;
+  int FIELD = 80;
   /** RegularExpression Id. */
-  int PERIOD = 81;
+  int ANY_FIELD = 81;
   /** RegularExpression Id. */
-  int PARENT_SHORT = 82;
+  int PERIOD = 82;
   /** RegularExpression Id. */
-  int AT = 83;
+  int PARENT_SHORT = 83;
   /** RegularExpression Id. */
-  int POSITION = 84;
+  int AT = 84;
   /** RegularExpression Id. */
-  int LAST = 85;
+  int POSITION = 85;
   /** RegularExpression Id. */
-  int COUNT = 86;
+  int LAST = 86;
   /** RegularExpression Id. */
-  int ID = 87;
+  int COUNT = 87;
   /** RegularExpression Id. */
-  int NAMESPACEURI = 88;
+  int ID = 88;
   /** RegularExpression Id. */
-  int LOCALNAME = 89;
+  int NAMESPACEURI = 89;
   /** RegularExpression Id. */
-  int NAME = 90;
+  int LOCALNAME = 90;
   /** RegularExpression Id. */
-  int STRING = 91;
+  int NAME = 91;
   /** RegularExpression Id. */
-  int CONCAT = 92;
+  int STRING = 92;
   /** RegularExpression Id. */
-  int STARTSWITH = 93;
+  int CONCAT = 93;
   /** RegularExpression Id. */
-  int CONTAINSFUNC = 94;
+  int STARTSWITH = 94;
   /** RegularExpression Id. */
-  int SUBSTRINGBEFORE = 95;
+  int CONTAINSFUNC = 95;
   /** RegularExpression Id. */
-  int SUBSTRINGAFTER = 96;
+  int SUBSTRINGBEFORE = 96;
   /** RegularExpression Id. */
-  int SUBSTRING = 97;
+  int SUBSTRINGAFTER = 97;
   /** RegularExpression Id. */
-  int SUBSTRINGLENGTH = 98;
+  int SUBSTRING = 98;
   /** RegularExpression Id. */
-  int NORMALIZESPACE = 99;
+  int SUBSTRINGLENGTH = 99;
   /** RegularExpression Id. */
-  int TRANSLATE = 100;
+  int NORMALIZESPACE = 100;
   /** RegularExpression Id. */
-  int BOOLEAN = 101;
+  int TRANSLATE = 101;
   /** RegularExpression Id. */
-  int NOT = 102;
+  int BOOLEAN = 102;
   /** RegularExpression Id. */
-  int TRUE = 103;
+  int NOT = 103;
   /** RegularExpression Id. */
-  int FALSE = 104;
+  int TRUE = 104;
   /** RegularExpression Id. */
-  int LANG = 105;
+  int FALSE = 105;
   /** RegularExpression Id. */
-  int NUMBERFUNC = 106;
+  int LANG = 106;
   /** RegularExpression Id. */
-  int SUM = 107;
+  int NUMBERFUNC = 107;
   /** RegularExpression Id. */
-  int FLOOR = 108;
+  int SUM = 108;
   /** RegularExpression Id. */
-  int CEILING = 109;
+  int FLOOR = 109;
   /** RegularExpression Id. */
-  int ROUND = 110;
+  int CEILING = 110;
   /** RegularExpression Id. */
-  int VARIABLE = 111;
+  int ROUND = 111;
   /** RegularExpression Id. */
   int END_EXTRACT_MARK = 112;
   /** RegularExpression Id. */
@@ -300,9 +300,11 @@ public interface OXPathParserConstants {
   /** Lexical state. */
   int IN_PATH_OP = 2;
   /** Lexical state. */
-  int IN_DOUBLE_QUOTE_STRING_PATH = 3;
+  int ACTION = 3;
   /** Lexical state. */
-  int IN_SINGLE_QUOTE_STRING_PATH = 4;
+  int IN_DOUBLE_QUOTE_STRING_PATH = 4;
+  /** Lexical state. */
+  int IN_SINGLE_QUOTE_STRING_PATH = 5;
 
   /** Literal token values. */
   String[] tokenImage = {
@@ -326,6 +328,7 @@ public interface OXPathParserConstants {
     "\"submit\"",
     "\"check\"",
     "\"uncheck\"",
+    "<VARIABLE>",
     "\">\"",
     "\"}\"",
     "\"/\"",
@@ -417,7 +420,6 @@ public interface OXPathParserConstants {
     "<FLOOR>",
     "<CEILING>",
     "<ROUND>",
-    "<VARIABLE>",
     "\">\"",
     "\"-\"",
     "\"and\"",

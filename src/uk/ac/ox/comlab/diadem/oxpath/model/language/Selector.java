@@ -85,8 +85,8 @@ public enum Selector implements OXPathPredicate{
 	 * @return operator of expression
 	 * @throws OXPathException in case of exception in nested calls
 	 */
-	public OXPathType evaluateSet(OXPathNodeList<OXPathContextNode> contextSet, OXPathType other) throws OXPathException {
-		OXPathNodeList<OXPathContextNode> result = new OXPathNodeList<OXPathContextNode>();
+	public OXPathType evaluateSet(OXPathNodeList contextSet, OXPathType other) throws OXPathException {
+		OXPathNodeList result = new OXPathNodeList();
 		for (OXPathContextNode i : contextSet) {
 			result.addAll(this.evaluateIterative(i, other).nodeList());
 		}

@@ -245,7 +245,7 @@ PARSER_END(OXPathParser)
   < PROTOCOL : "http" ("s")? ":" "/" "/">
 }
 
-< DEFAULT > TOKEN :
+< ACTION > TOKEN :
 {
   < FOCUS : "focus" > : DEFAULT
 | < CLICK : "click" > : DEFAULT
@@ -262,6 +262,7 @@ PARSER_END(OXPathParser)
 | < CHECK : "check" > : DEFAULT
 | < UNCHECK : "uncheck" > : DEFAULT
 //| < WHILE : "while" >
+| < VARIABLE : < DOLLAR > < NCNAME > > : DEFAULT
 }
 
 < IN_URL > TOKEN :
@@ -312,12 +313,12 @@ PARSER_END(OXPathParser)
 | < OPEN_BRACKET : "[" > : DEFAULT
 | < CLOSE_BRACKET : "]" > : IN_PATH_OP
 | < BEGIN_URL_IN_PATH : "{" ( < SPACE > | < TAB > | < NEWLINE > )* "<" > : IN_URL
-| < OPEN_CURLY : "{" > : DEFAULT
+| < OPEN_CURLY : "{" > : ACTION
 | < CLOSE_CURLY : "}" > :DEFAULT
 | < COMMA : "," > : DEFAULT
 | < NUMBER : (< DIGITS > "." (< DIGITS >)?) | ("." < DIGITS >) > : IN_PATH_OP//Integers are returned as <DIGITS > tokens
 | < DESCENDENT_OR_SELF_SHORT : "/" ( < SPACE > | < TAB > | < NEWLINE > )* "/" > : DEFAULT
-| < BEGIN_USER_ACTION :  "/" ( < SPACE > | < TAB > | < NEWLINE > )* "{" > : DEFAULT
+| < BEGIN_USER_ACTION :  "/" ( < SPACE > | < TAB > | < NEWLINE > )* "{" > : ACTION
 | < BEGIN_KLEENE_STAR :  "/" ( < SPACE > | < TAB > | < NEWLINE > )* "(" > : DEFAULT
 | < BEGIN_BOUNDED_KLEENE_STAR_PRED : "*" ( < SPACE > | < TAB > | < NEWLINE > )* "{" > : DEFAULT
 | < SLASH : "/" > : DEFAULT
@@ -379,7 +380,6 @@ PARSER_END(OXPathParser)
 | < FLOOR : "floor" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
 | < CEILING : "ceiling" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
 | < ROUND : "round" ( < SPACE > | < TAB > | < NEWLINE > )* < OPEN_PARAN > > : DEFAULT
-| < VARIABLE : < DOLLAR > < NCNAME > > : DEFAULT
 | < END_EXTRACT_MARK : ">" > : DEFAULT
 | < NEGATIVE : "-"> : DEFAULT
 }
@@ -425,12 +425,12 @@ PARSER_END(OXPathParser)
 | < COLON : ":" >
 }
 
-< DEFAULT > TOKEN : /* NUMBER */
+< DEFAULT,ACTION > TOKEN : /* NUMBER */
 {
-  < DIGITS : (["0"-"9"])+ >
+  < DIGITS : (["0"-"9"])+ > : DEFAULT
 }
 
-< DEFAULT > MORE :
+< DEFAULT, ACTION > MORE :
 {
 < "\"" > : IN_DOUBLE_QUOTE_STRING_PATH
 }
@@ -447,7 +447,7 @@ MORE :
 < ~["\""] >
 }
 
-< DEFAULT > MORE :
+< DEFAULT, ACTION > MORE :
 {
 < "'" > : IN_SINGLE_QUOTE_STRING_PATH
 }

@@ -34,7 +34,9 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.Stack;
 
@@ -165,23 +167,25 @@ public class PAATEvalVisitor extends OXPathVisitorGenericAdaptor<PAATStateEvalSe
 		int numChild = 0;
 		if (data.getContextSet().isEmpty()) return OXPathType.EMPTYRESULT;
 		//first handle, if this is an absolute path
-		OXPathNodeList<OXPathContextNode> context;
+		OXPathNodeList context;
 		if (node.isAbsolutePath()) {
-			context = new OXPathNodeList<OXPathContextNode>();
-			OXPathContextNode firstDomNode = data.getContextSet().get(0);
+			context = new OXPathNodeList();
+			OXPathContextNode firstDomNode = data.getContextSet().first();
 			context.add(new OXPathContextNode(firstDomNode.getNode().getOwnerDocument().getDocumentElement(),firstDomNode.getParent(),firstDomNode.getLast()));
 		} 
 		else context = data.getContextSet();
 		//next, handle any simple expression via eval_
-		OXPathNodeList<OXPathContextNode> simpleResult;
+		OXPathNodeList simpleResult;
 		if (node.hasSimplePath()) {
-			simpleResult = new OXPathNodeList<OXPathContextNode>();
+			simpleResult = new OXPathNodeList();
 			int astSimple = numChild++;
-			for (int i = 0; i < context.size(); i++) {
-				boolean newProtect = (i>=context.size()-1)?data.isDocumentProtected():true;
-				PAATStateEvalIterative newState = new PAATState.Builder(data).setContextNode(context.get(i)).setDocumentProtect(newProtect).buildNode();
+			Iterator<OXPathContextNode> iterator = context.iterator();
+			while (iterator.hasNext()) {
+				OXPathContextNode c = iterator.next();
+				boolean newProtect = (iterator.hasNext())?true:data.isDocumentProtected();
+				PAATStateEvalIterative newState = new PAATState.Builder(data).setContextNode(c).setDocumentProtect(newProtect).buildNode();
 				simpleResult.addAll(
-						this.eval_visitor.eval_(context.get(i).getNode(), node.jjtGetChild(astSimple), newState).nodeList());
+						this.eval_visitor.eval_(c.getNode(), node.jjtGetChild(astSimple), newState).nodeList());
 			}
 		}
 		else simpleResult = context;
@@ -214,8 +218,8 @@ public class PAATEvalVisitor extends OXPathVisitorGenericAdaptor<PAATStateEvalSe
 	 */
 	@Override
 	public OXPathType visitNode(ASTOXPathKleeneStarPath node, PAATStateEvalSet data) throws OXPathException {
-		OXPathNodeList<OXPathContextNode> context = data.getContextSet();
-		OXPathNodeList<OXPathContextNode> result = new OXPathNodeList<OXPathContextNode>();
+		OXPathNodeList context = data.getContextSet();
+		OXPathNodeList result = new OXPathNodeList();
 		if (context.isEmpty()) return OXPathType.EMPTYRESULT;
 		if (OXPathParser.hasActionOnMainPath(node.jjtGetChild(0))) {
 			int lower = node.getLowerBound();
@@ -255,10 +259,10 @@ public class PAATEvalVisitor extends OXPathVisitorGenericAdaptor<PAATStateEvalSe
 			else return this.accept(node.jjtGetChild(0), data);
 		}
 		else {
-			OXPathNodeList<OXPathContextNode> context = data.getContextSet();
-			OXPathNodeList<OXPathContextNode> result = new OXPathNodeList<OXPathContextNode>();
+			OXPathNodeList context = data.getContextSet();
+			OXPathNodeList result = new OXPathNodeList();
 			if (context.isEmpty()) return OXPathType.EMPTYRESULT;
-			WebBrowser actionSetBrowser = (node.getAction().getActionType().equals(ActionType.URL))?null:context.get(0).getNode().getOwnerDocument().getEnclosingWindow().getBrowser();
+			WebBrowser actionSetBrowser = (node.getAction().getActionType().equals(ActionType.URL))?null:context.first().getNode().getOwnerDocument().getEnclosingWindow().getBrowser();
 			ArrayList<NodeReference> references = this.domlookup.getNodeReferences(context);
 			for (int i=0; i<context.size(); i++) {
 				OXPathContextNode c = (node.getAction().getActionType().equals(ActionType.URL))?OXPathContextNode.getNotionalContext():references.get(i).getRenderedNode(actionSetBrowser.getContentDOMWindow().getDocument());
@@ -266,22 +270,33 @@ public class PAATEvalVisitor extends OXPathVisitorGenericAdaptor<PAATStateEvalSe
 				OXPathContextNode newNode = this.takeAction(c, node.getAction(), newProtect, data.getCurrentAction());
 				final int newCurrentAction = this.currentAction;
 				if (!node.getAction().isAbsoluteAction()) {//calculate AFP
-					PAATStateEvalSet afpState = new PAATState.Builder(data).setContextSet(new OXPathNodeList<OXPathContextNode>(newNode)).setIsActionFreeNavigation(true).setCurrentAction(newCurrentAction).setActionFreePrefixEnd(node).buildSet();
-					OXPathNodeList<OXPathContextNode> afpSet = this.accept(data.getActionFreePrefix(), afpState).nodeList();
+					PAATStateEvalSet afpState = new PAATState.Builder(data).setContextSet(new OXPathNodeList(newNode)).setIsActionFreeNavigation(true).setCurrentAction(newCurrentAction).setActionFreePrefixEnd(node).buildSet();
+					OXPathNodeList afpSet = this.accept(data.getActionFreePrefix(), afpState).nodeList();
+					//multi-way set based evaluation doesn't happen often and aren't big sets, but they are expensive
+					if (afpSet.isEmpty()) continue;//we continue if there is no element after this AFP
+					Iterator<OXPathContextNode> iterator = afpSet.iterator();
+					OXPathContextNode afpNode = iterator.next();
+					try {
+						for (int j=0; j<i;j++) {
+							afpNode=iterator.next();
+						}
+					} catch (NoSuchElementException e) {
+						continue;//we continue if there is no element after this AFP
+					}
 					//because we don't do the extraction markers, these won't come back correct if there are extraction markers in the AFP
-					newNode = new OXPathContextNode(afpSet.get(i).getNode(),c.getParent(),c.getLast());
+					newNode = new OXPathContextNode(afpNode.getNode(),c.getParent(),c.getLast());
 				}
 				PAATStateEvalSet actionState;
-				if (node.getAction().isAbsoluteAction()) actionState = new PAATState.Builder(data).setContextSet(new OXPathNodeList<OXPathContextNode>(newNode)).setDocumentProtect(false).setActionFreePrefix(node).setCurrentAction(newCurrentAction).buildSet();
-				else actionState = new PAATState.Builder(data).setContextSet(new OXPathNodeList<OXPathContextNode>(newNode)).setDocumentProtect(false).setCurrentAction(newCurrentAction).buildSet();
-				OXPathNodeList<OXPathContextNode> predResult;
+				if (node.getAction().isAbsoluteAction()) actionState = new PAATState.Builder(data).setContextSet(new OXPathNodeList(newNode)).setDocumentProtect(false).setActionFreePrefix(node).setCurrentAction(newCurrentAction).buildSet();
+				else actionState = new PAATState.Builder(data).setContextSet(new OXPathNodeList(newNode)).setDocumentProtect(false).setCurrentAction(newCurrentAction).buildSet();
+				OXPathNodeList predResult;
 				final boolean evalAsKleene = node.isInsideKleeneStar() && (data.getNumKleeneStarIterations() > 0);
 				if (node.hasTail()) {
 					predResult = this.accept(node.jjtGetChild(0), actionState).nodeList();
 					if (!evalAsKleene) result.addAll(predResult);
 				}
 				else {
-					predResult = new OXPathNodeList<OXPathContextNode>(newNode);
+					predResult = new OXPathNodeList(newNode);
 					if (!evalAsKleene) result.add(newNode);
 				} 
 				if (evalAsKleene && !predResult.isEmpty()) {
@@ -313,7 +328,7 @@ public class PAATEvalVisitor extends OXPathVisitorGenericAdaptor<PAATStateEvalSe
 	public OXPathType visitNode(ASTOXPathNodeTestOp node, PAATStateEvalSet data) throws OXPathException {
 		//because this node can't contain a position function, we assume a later node contains the function and make the set call of the next node 
 		if (!node.hasList() || !node.getSetBasedEval().equals(PositionFuncEnum.NEITHER)) throw new OXPathException("Unexpected call in PAAT to set-based OXPathNodeTestOp node");
-		OXPathNodeList<OXPathContextNode> context = data.getContextSet();
+		OXPathNodeList context = data.getContextSet();
 		OXPathType result = node.getSelectorPredicate().evaluateSet(context);
 		PAATStateEvalSet newState = new PAATState.Builder(data).setContextSet(result.nodeList()).buildSet();
 		return this.accept(node.jjtGetChild(0), newState);
@@ -339,29 +354,34 @@ public class PAATEvalVisitor extends OXPathVisitorGenericAdaptor<PAATStateEvalSe
 	@Override
 	public OXPathType visitNode(ASTXPathPredicate node, PAATStateEvalSet data) throws OXPathException {
 		//since we are doing set-based predicate eval, each node will need position and last assignment
-		OXPathNodeList<OXPathContextNode> context = data.getContextSet();
-		OXPathNodeList<OXPathContextNode> result = new OXPathNodeList<OXPathContextNode>();
-		for (int i=0; i < context.size();i++ ) {
-			OXPathContextNode c = context.get(i);
+		OXPathNodeList context = data.getContextSet();
+		OXPathNodeList result = new OXPathNodeList();
+		Iterator<OXPathContextNode> iteratorContext = context.iterator();
+		int positionCount = 1;
+		while (iteratorContext.hasNext()) {
+			OXPathContextNode c = iteratorContext.next();
 			//position is i+1 because XPath counting begins at 1, not 0
-			PAATStateEvalSet predState = new PAATState.Builder(data).setPosition(i+1).setLast(context.size()).setDocumentProtect((node.hasList()||i<context.size()-1)?true:data.isDocumentProtected())
-			.setContextSet(new OXPathNodeList<OXPathContextNode>(new OXPathContextNode(c.getNode(),c.getLast(),c.getLast())))
+			PAATStateEvalSet predState = new PAATState.Builder(data).setPosition(positionCount).setLast(context.size()).setDocumentProtect((node.hasList()||iteratorContext.hasNext())?true:data.isDocumentProtected())
+			.setContextSet(new OXPathNodeList(new OXPathContextNode(c.getNode(),c.getLast(),c.getLast())))
 			.setDocumentProtect((node.hasList())?true:data.isDocumentProtected()).setNumKleeneStarIterations(0).buildSet();
 			OXPathType predResult = this.accept(node.jjtGetChild(0), predState);
 			if (predResult.isType().equals(OXPathTypes.NUMBER)) {
-				if (new Integer(i+1).doubleValue()==predResult.number()) result.add(c);
+				if (new Integer(positionCount).doubleValue()==predResult.number()) result.add(c);
 			}
 			else if (predResult.booleanValue() || node.isOptional()) result.add(c);
+			positionCount++;
 		}
 		//what we do with the result set depends on the whether the next node exists and if it is set-based or not
 		if (!node.hasList() || result.isEmpty()) return new OXPathType(result);
 		else if (!node.getSetBasedEval().equals(PositionFuncEnum.NEITHER)) return this.accept(node.jjtGetChild(1), new PAATState.Builder(data).setContextSet(result).buildSet());
 		else {
-			OXPathNodeList<OXPathContextNode> finalResult = new OXPathNodeList<OXPathContextNode>();
-			for (int i=0; i < result.size(); i++) {
+			OXPathNodeList finalResult = new OXPathNodeList();
+			Iterator<OXPathContextNode> iteratorResult = result.iterator();
+			while (iteratorResult.hasNext()) {
+				OXPathContextNode r = iteratorResult.next();
 				//we need to account for the last in the set as this wasn't done in the step
-				PAATStateEvalIterative listState = new PAATState.Builder(data).setContextNode(result.get(i)).setDocumentProtect((i<result.size()-1)?true:data.isDocumentProtected()).buildNode();
-				finalResult.addAll(this.eval_visitor.eval_(result.get(i).getNode(), node.jjtGetChild(1), listState).nodeList());
+				PAATStateEvalIterative listState = new PAATState.Builder(data).setContextNode(r).setDocumentProtect((iteratorResult.hasNext())?true:data.isDocumentProtected()).buildNode();
+				finalResult.addAll(this.eval_visitor.eval_(r.getNode(), node.jjtGetChild(1), listState).nodeList());
 			}
 			return new OXPathType(finalResult);
 		}
@@ -375,7 +395,7 @@ public class PAATEvalVisitor extends OXPathVisitorGenericAdaptor<PAATStateEvalSe
 	 */
 	@Override
 	public OXPathType visitNode(ASTOXPathExtractionMarker node, PAATStateEvalSet data) throws OXPathException {
-		OXPathNodeList<OXPathContextNode> contextSet = data.getContextSet();
+		OXPathNodeList contextSet = data.getContextSet();
 		OXPathExtractionMarker marker = node.getExtractionMarker();
 		//we avoid all of this if in AFP
 		if (data.isActionFreeNavigation()) {
@@ -383,14 +403,15 @@ public class PAATEvalVisitor extends OXPathVisitorGenericAdaptor<PAATStateEvalSe
 			else return new OXPathType(contextSet);
 		}
 		//apply the extraction marker for each node in the set
-		OXPathNodeList<OXPathContextNode> newContext = new OXPathNodeList<OXPathContextNode>();
-		for (int i = 0; i < contextSet.size(); i++) {
-			OXPathContextNode context = contextSet.get(i);
+		OXPathNodeList newContext = new OXPathNodeList();
+		Iterator<OXPathContextNode> iteratorContext = contextSet.iterator();
+		while (iteratorContext.hasNext()) {
+			OXPathContextNode context = iteratorContext.next();
 			int numChild = 0;
 			int newLastSibling;
 			if (marker.isAttribute()) {
-				PAATStateEvalSet newState = new PAATState.Builder(data).setContextSet(new OXPathNodeList<OXPathContextNode>(context))//i+1 for position due to OXPath counting beginning at 1
-				.setDocumentProtect((node.hasList() || i<contextSet.size()-1)?true:data.isDocumentProtected()).buildSet();
+				PAATStateEvalSet newState = new PAATState.Builder(data).setContextSet(new OXPathNodeList(context))//i+1 for position due to OXPath counting beginning at 1
+				.setDocumentProtect((node.hasList() || iteratorContext.hasNext())?true:data.isDocumentProtected()).buildSet();
 				newLastSibling = this.extractor.extractNode(context.getNode(), marker.getLabel(),context.getParent(),
 						this.accept(node.jjtGetChild(numChild++), newState).toPrettyHtml());
 			}
@@ -403,10 +424,11 @@ public class PAATEvalVisitor extends OXPathVisitorGenericAdaptor<PAATStateEvalSe
 		if (node.hasList()) {//if there are following simple parts of the expression
 			if (!node.getSetBasedEval().equals(PositionFuncEnum.NEITHER)) return this.accept(node.jjtGetChild((marker.isAttribute())?1:0), new PAATState.Builder(data).setContextSet(newContext).buildSet());
 			else {//the positional predicate was in the attribute and we switch back to iterative evaluation
-				OXPathNodeList<OXPathContextNode> finalResult = new OXPathNodeList<OXPathContextNode>();
-				for (int i = 0; i < newContext.size(); i++) {
-					OXPathContextNode newNode = newContext.get(i);
-					PAATStateEvalIterative newState = new PAATState.Builder(data).setContextNode(newNode).setDocumentProtect((i<newContext.size()-1)?true:data.isDocumentProtected()).buildNode();
+				OXPathNodeList finalResult = new OXPathNodeList();
+				Iterator<OXPathContextNode> iteratorResult = newContext.iterator();
+				while (iteratorResult.hasNext()) {
+					OXPathContextNode newNode = iteratorResult.next();
+					PAATStateEvalIterative newState = new PAATState.Builder(data).setContextNode(newNode).setDocumentProtect((iteratorResult.hasNext())?true:data.isDocumentProtected()).buildNode();
 					finalResult.addAll(this.eval_visitor.eval_(newNode.getNode(), node.jjtGetChild((marker.isAttribute())?1:0), newState).nodeList());
 				}
 				return new OXPathType(finalResult);
@@ -490,17 +512,19 @@ public class PAATEvalVisitor extends OXPathVisitorGenericAdaptor<PAATStateEvalSe
 	@Override
 	public OXPathType visitNode(ASTXPathPathExpr node, PAATStateEvalSet data) throws OXPathException {
 		//This one is basically the set-based version of RelativeOXPath expression; due to JavaCC node creation, it was unclear how to replace the second part with a RelativeOXPath node
-		OXPathNodeList<OXPathContextNode> context = this.accept(node.jjtGetChild(0), data).nodeList();
+		OXPathNodeList context = this.accept(node.jjtGetChild(0), data).nodeList();
 		int numChild = 1;//we've already evaluated the first child
 		//next, handle any simple expression via eval_
-		OXPathNodeList<OXPathContextNode> simpleResult;
+		OXPathNodeList simpleResult;
 		if (node.hasSimpleList()) {
-			simpleResult = new OXPathNodeList<OXPathContextNode>();
+			simpleResult = new OXPathNodeList();
 			int astSimple = numChild++;
-			for (int i = 0; i < context.size(); i++) {
-				boolean newProtect = (i>=context.size()-1)?data.isDocumentProtected():true;
-				PAATStateEvalIterative newState = new PAATState.Builder(data).setContextNode(context.get(i)).setDocumentProtect(newProtect).buildNode();
-				simpleResult.addAll(this.eval_visitor.eval_(context.get(i).getNode(), node.jjtGetChild(astSimple), newState).nodeList());
+			Iterator<OXPathContextNode> iterator = context.iterator();
+			while (iterator.hasNext()) {
+				OXPathContextNode c = iterator.next();
+				boolean newProtect = (iterator.hasNext())?true:data.isDocumentProtected();
+				PAATStateEvalIterative newState = new PAATState.Builder(data).setContextNode(c).setDocumentProtect(newProtect).buildNode();
+				simpleResult.addAll(this.eval_visitor.eval_(c.getNode(), node.jjtGetChild(astSimple), newState).nodeList());
 			}
 		}
 		else simpleResult = context;

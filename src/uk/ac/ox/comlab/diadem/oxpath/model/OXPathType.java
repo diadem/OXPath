@@ -82,7 +82,7 @@ public class OXPathType {
 	 * Constructor for nodelists
 	 * @param in input nodelist
 	 */
-	public OXPathType(OXPathNodeList<OXPathContextNode> in) {
+	public OXPathType(OXPathNodeList in) {
 		this.set(in);
 	}
 	
@@ -111,33 +111,6 @@ public class OXPathType {
 	}
 
 	/**
-	 * Constructor for handling output from the getByXPath function from HtmlUnit
-	 * @param byXPath input of List<?> from getByXPath
-	 */
-	public OXPathType(List<?> byXPath) {
-		Object first = byXPath.get(0);
-		if (first instanceof DOMNode) {
-			this.nodes.addList(byXPath);
-			this.type=NODESET;
-		}
-		else if (first instanceof String) {
-			this.string = (String) first;
-			this.type = STRING;
-		}
-		else if (first instanceof Double) {
-			this.number = (Double) first;
-			this.type = NUMBER;
-		}
-		else if (first instanceof Boolean) {
-			this.bool = (Boolean) first;
-			this.type = BOOLEAN;
-		}
-		else {
-			this.type = NULL;
-		}
-	}
-
-	/**
 	  * Constructor for handling output from the getByXPath function from HtmlUnit
 	 * @param byXPath input of List<?> from getByXPath
 	 * @param parent reference to parent node of current context
@@ -148,7 +121,7 @@ public class OXPathType {
 		else {
 			Object first = byXPath.get(0);
 			if (first instanceof DOMNode) {
-				this.nodes = new OXPathNodeList<OXPathContextNode>();
+				this.nodes = new OXPathNodeList();
 				for (Object n : byXPath) {
 					this.nodes.add(new OXPathContextNode((DOMNode)n,parent,last));
 				}
@@ -179,7 +152,7 @@ public class OXPathType {
 	 * @param j input NodeList
 	 */
 	public OXPathType(OXPathContextNode j) {
-		this.nodes = new OXPathNodeList<OXPathContextNode>();
+		this.nodes = new OXPathNodeList();
 		this.nodes.add(j);
 		this.type = NODESET;
 	}
@@ -188,8 +161,8 @@ public class OXPathType {
 	 * Expression for setting state
 	 * @param in input NodeList
 	 */
-	public void set(OXPathNodeList<OXPathContextNode> in) {
-		if (this.nodes==null) this.nodes = new OXPathNodeList<OXPathContextNode>();
+	public void set(OXPathNodeList in) {
+		if (this.nodes==null) this.nodes = new OXPathNodeList();
 		this.nodes.addAll(in);
 		this.type = NODESET;
 	}
@@ -241,9 +214,9 @@ public class OXPathType {
 	 * @return object as <tt>OXPathNodeList</tt>
 	 * @throws OXPathException if the object is null
 	 */
-	public OXPathNodeList<OXPathContextNode> nodeList() throws OXPathException {
+	public OXPathNodeList nodeList() throws OXPathException {
 		if (this.type.equals(NODESET)) return this.nodes;
-		else return new OXPathNodeList<OXPathContextNode>();
+		else return new OXPathNodeList();
 //		else throw new OXPathException("OXPathType exception - Can't cast " + this.type.toString() + " as " + NODESET.toString());
 	}
 	
@@ -256,7 +229,7 @@ public class OXPathType {
 		if (this.type.equals(STRING)) return this.string;
 		else if (this.type.equals(NODESET)) {
 			if (this.nodes.isEmpty()) return "";
-			else return this.nodes.get(0).getByXPath("string(.)").string();
+			else return this.nodes.first().getByXPath("string(.)").string();
 		}
 		else if (this.type.equals(BOOLEAN)) return (this.bool) ? "true" : "false";
 		else if (this.type.equals(NUMBER)) return String.valueOf(this.number);
@@ -277,7 +250,10 @@ public class OXPathType {
 			else return Double.valueOf(this.string);
 		}
 		else if (this.type.equals(BOOLEAN)) return (this.bool) ? 1.0 : 0.0;
-		else if (this.type.equals(NODESET)) return Double.valueOf(this.nodes.get(0).getByXPath("string(.)").string());
+		else if (this.type.equals(NODESET)) {
+			if (this.nodes.isEmpty()) return Double.NaN;
+			return Double.valueOf(this.nodes.first().getByXPath("string(.)").string());
+		}
 		else throw new OXPathException("OXPathType exception - Can't cast " + this.type.toString() + " as " + NUMBER.toString());
 	}
 	
@@ -379,7 +355,7 @@ public class OXPathType {
 	/**
 	 * Instance field for storing field, if used
 	 */
-	private OXPathNodeList<OXPathContextNode> nodes;
+	private OXPathNodeList nodes;
 	
 	/**
 	 * Instance field for storing field, if used

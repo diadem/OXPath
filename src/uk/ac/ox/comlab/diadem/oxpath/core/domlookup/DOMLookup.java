@@ -33,7 +33,6 @@ package uk.ac.ox.comlab.diadem.oxpath.core.domlookup;
 
 import java.util.ArrayList;
 
-import uk.ac.ox.comlab.diadem.oxpath.model.OXPathContextNode;
 import uk.ac.ox.comlab.diadem.oxpath.model.OXPathNodeList;
 import uk.ac.ox.comlab.diadem.oxpath.utils.OXPathException;
 
@@ -52,6 +51,6 @@ public interface DOMLookup {
 	 * @return references to these nodes retrievable in a new document
 	 * @throws OXPathException in case of browser error (will carry the throwable cause)
 	 */
-	public ArrayList<NodeReference> getNodeReferences(OXPathNodeList<OXPathContextNode> nodes) throws OXPathException;
+	public ArrayList<NodeReference> getNodeReferences(OXPathNodeList nodes) throws OXPathException;
 	
 }

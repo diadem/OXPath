@@ -30,7 +30,6 @@
  */
 package uk.ac.ox.comlab.diadem.oxpath.model.language.operators;
 
-import uk.ac.ox.comlab.diadem.oxpath.model.OXPathContextNode;
 import uk.ac.ox.comlab.diadem.oxpath.model.OXPathNodeList;
 import uk.ac.ox.comlab.diadem.oxpath.model.OXPathType;
 import uk.ac.ox.comlab.diadem.oxpath.utils.OXPathException;
@@ -83,7 +82,7 @@ public enum HigherLevelOp implements BinaryOperator {
 		 * @return value of expression
 		 */
 		public OXPathType evaluate(OXPathType lhs, OXPathType rhs) throws OXPathException {
-			OXPathNodeList<OXPathContextNode> newList = new OXPathNodeList<OXPathContextNode>();
+			OXPathNodeList newList = new OXPathNodeList();
 			newList.addAll(lhs.nodeList());
 			newList.addAll(rhs.nodeList());
 			return new OXPathType(newList);

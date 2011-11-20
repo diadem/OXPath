@@ -107,9 +107,7 @@ public enum XPathFunctions implements XPathFunction {
 		 * @throws OXPathException in case of function error
 		 */
 		public OXPathType evaluate(ArrayList<OXPathType> args, PAATStateEvalSet state) throws OXPathException {
-			return new OXPathType(args.get(0).nodeList().getByXPath("id(.)"));/*a bit of hack; our getByXPath function builds the set
-			   *by constructing results from a single node at a time;
-			   *meant normally for navigation*/
+			throw new OXPathException("XPath id function not implemented in OXPath - use # selector instead!");
 		}
 	},
 	
@@ -126,8 +124,8 @@ public enum XPathFunctions implements XPathFunction {
 		 * @throws OXPathException in case of function error
 		 */
 		public OXPathType evaluate(ArrayList<OXPathType> args, PAATStateEvalSet state) throws OXPathException {
-			if (args.isEmpty()) return state.getContextSet().get(0).getByXPath("namespace-uri(.)");
-			else return args.get(0).nodeList().get(0).getByXPath("namespace-uri(.)");
+			if (args.isEmpty()) return state.getContextSet().first().getByXPath("namespace-uri(.)");
+			else return args.get(0).nodeList().first().getByXPath("namespace-uri(.)");
 		}
 	},
 	
@@ -144,8 +142,8 @@ public enum XPathFunctions implements XPathFunction {
 		 * @throws OXPathException in case of function error
 		 */
 		public OXPathType evaluate(ArrayList<OXPathType> args, PAATStateEvalSet state) throws OXPathException {
-			if (args.isEmpty()) return state.getContextSet().get(0).getByXPath("local-name(.)");
-			else return args.get(0).nodeList().get(0).getByXPath("local-name(.)");
+			if (args.isEmpty()) return state.getContextSet().first().getByXPath("local-name(.)");
+			else return args.get(0).nodeList().first().getByXPath("local-name(.)");
 		}
 	},
 
@@ -162,8 +160,8 @@ public enum XPathFunctions implements XPathFunction {
 		 * @throws OXPathException in case of function error
 		 */
 		public OXPathType evaluate(ArrayList<OXPathType> args, PAATStateEvalSet state) throws OXPathException {
-			if (args.isEmpty()) return state.getContextSet().get(0).getByXPath("name(.)");
-			else return args.get(0).nodeList().get(0).getByXPath("name(.)");
+			if (args.isEmpty()) return state.getContextSet().first().getByXPath("name(.)");
+			else return args.get(0).nodeList().first().getByXPath("name(.)");
 		}	
 	},
 	
@@ -434,7 +432,7 @@ public enum XPathFunctions implements XPathFunction {
 		 * @throws OXPathException in case of function error
 		 */
 		public OXPathType evaluate(ArrayList<OXPathType> args, PAATStateEvalSet state) throws OXPathException {
-			return state.getContextSet().get(0).getByXPath("lang(" + args.get(0).string() + ")");
+			return state.getContextSet().first().getByXPath("lang(" + args.get(0).string() + ")");
 		}		
 	},
 	

@@ -68,7 +68,7 @@ public class SelectorPredicate implements OXPathPredicate {
 	 * @return value of expression
 	 * @throws OXPathException in case of exception in nested calls
 	 */
-	public OXPathType evaluateSet(OXPathNodeList<OXPathContextNode> contextSet) throws OXPathException {
+	public OXPathType evaluateSet(OXPathNodeList contextSet) throws OXPathException {
 		return this.selector.evaluateSet(contextSet, this.attributeName);
 	}
 	

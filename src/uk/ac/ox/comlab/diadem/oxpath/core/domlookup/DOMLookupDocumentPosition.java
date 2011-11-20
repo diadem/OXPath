@@ -61,7 +61,7 @@ public class DOMLookupDocumentPosition implements DOMLookup {
 	 * @return references to these nodes retrievable in a new document
 	 * @throws OXPathException in case of browser error (will carry the throwable cause)
 	 */
-	public ArrayList<NodeReference> getNodeReferences(OXPathNodeList<OXPathContextNode> nodes) throws OXPathException {
+	public ArrayList<NodeReference> getNodeReferences(OXPathNodeList nodes) throws OXPathException {
 		ArrayList<NodeReference> result = new ArrayList<NodeReference>();
 		for (OXPathContextNode node : nodes) {
 			result.add(new NodeReferenceDocumentPosition(node));

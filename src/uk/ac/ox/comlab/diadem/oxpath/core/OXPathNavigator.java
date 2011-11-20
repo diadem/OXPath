@@ -201,7 +201,7 @@ public class OXPathNavigator {
 	public static OXPathType evaluateOXPathQuery(Node n, WebBrowser browser, Logger logger, ObjectOutputStream os) throws ParserConfigurationException, DOMException, OXPathException, SAXException, IOException {
 		if (logger==null) logger = LoggerFactory.getLogger(OXPathNavigator.class);
 		PAATEvalVisitor pv = PAATEvalVisitor.newInstance(browser, logger, os);
-		return pv.accept(n, new PAATState.Builder(new OXPathNodeList<OXPathContextNode>(OXPathContextNode.getNotionalContext())).buildSet());
+		return pv.accept(n, new PAATState.Builder(new OXPathNodeList(OXPathContextNode.getNotionalContext())).buildSet());
 	}
 	
 }

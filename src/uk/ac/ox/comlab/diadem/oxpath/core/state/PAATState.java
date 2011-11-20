@@ -84,7 +84,7 @@ public abstract class PAATState {
 		 * (we don't make defensive copies of the context set for performance reasons, so be aware).
 		 * @param iContext context
 		 */
-		public Builder(OXPathNodeList<OXPathContextNode> iContext) {
+		public Builder(OXPathNodeList iContext) {
 			this.contextSet = iContext;
 			//default initial values
 			this.actionFreePrefix = null;
@@ -136,7 +136,7 @@ public abstract class PAATState {
 		 * @param numHigher number of Kleene star iterations to perform by inner actions (only applicable to final inner action inside each Kleene star)
 		 * @param currAction the id of the current action 
 		 */
-		public Builder(OXPathNodeList<OXPathContextNode> iContext, Node iAFP, Node iAFPE, boolean iIsAFP, int iPosition, int iLast, boolean iProtect, int numHigher, int currAction) {
+		public Builder(OXPathNodeList iContext, Node iAFP, Node iAFPE, boolean iIsAFP, int iPosition, int iLast, boolean iProtect, int numHigher, int currAction) {
 			this.contextSet = iContext;
 			this.actionFreePrefix = iAFP;
 			this.actionFreePrefixEnd = iAFPE;
@@ -202,7 +202,7 @@ public abstract class PAATState {
 		 * @param o context set
 		 * @return same object with update applied
 		 */
-		public Builder setContextSet(OXPathNodeList<OXPathContextNode> o) {
+		public Builder setContextSet(OXPathNodeList o) {
 			this.contextSet = o;
 			this.type = SET;
 			return this;
@@ -304,7 +304,7 @@ public abstract class PAATState {
 				return new PAATStateEvalIterative(this,this.contextNode);
 			case SET://in case of a set, the first node in the set becomes the iterative node
 			default:
-				return new PAATStateEvalIterative(this,(this.contextSet.isEmpty())?OXPathContextNode.getNotionalContext():this.contextSet.get(0));
+				return new PAATStateEvalIterative(this,(this.contextSet.isEmpty())?OXPathContextNode.getNotionalContext():this.contextSet.first());
 			}
 		}
 
@@ -315,7 +315,7 @@ public abstract class PAATState {
 		public PAATStateEvalSet buildSet() {
 			switch (this.type) {
 			case ITERATIVE:
-				return new PAATStateEvalSet(this,new OXPathNodeList<OXPathContextNode>(this.contextNode),this.higher,this.currentAction);
+				return new PAATStateEvalSet(this,new OXPathNodeList(this.contextNode),this.higher,this.currentAction);
 			case SET:
 			default:
 				return new PAATStateEvalSet(this,this.contextSet,this.higher,this.currentAction);
@@ -332,7 +332,7 @@ public abstract class PAATState {
 		/**
 		 * context set at current "step" in query (for eval state)
 		 */
-		private OXPathNodeList<OXPathContextNode> contextSet;
+		private OXPathNodeList contextSet;
 
 		/**
 		 * records the previous node for action free navigation root
