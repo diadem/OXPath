@@ -140,14 +140,15 @@ public class ActionEngine {
 		case TEXT://otherwise, we try and type on the element
 		case TEXTAREA:
 		case PASSWORD:
+		default:
 			if (action.endsWith(ENTERSIGNAL)) {
 				newPage = context.typeAndEnter(action.substring(0, action.lastIndexOf(ENTERSIGNAL))).getDocument().getDocumentElement();//use the typeAndEnter method on the action String after stripping the trailing '\n'
 			} else {
 				newPage = context.type(action).getDocument().getDocumentElement(); 
 			}
 			return newPage;
-		default:
-			throw new OXPathException("Cannot use explicit references for HTML elements other than <select> or <input> tags that support text entry");
+//		default:
+//			throw new OXPathException("Cannot use explicit references for HTML elements other than <select> or <input> tags that support text entry");
 		}
 
 	}

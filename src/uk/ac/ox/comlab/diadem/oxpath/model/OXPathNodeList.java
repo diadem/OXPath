@@ -35,9 +35,7 @@ import java.util.TreeSet;
 
 /**
  * 
- * Extends <tt>DomNode</tt> instead of <tt>Node</tt> because we will use <tt>DomNode</tt> specific methods like <tt>getByXPath()</tt>.  Implemented as
- * contracted by Java library interfaces except where noted.  In particular, for efficiency, lists only contain each element at most one time (set-based
- * paradigm)
+ * Object for holding a set of OXPath context nodes.  We use inheritance instead of composition as we don't make any internal dependendency on the class implementation.
  * @author AndrewJSel
  *
  */

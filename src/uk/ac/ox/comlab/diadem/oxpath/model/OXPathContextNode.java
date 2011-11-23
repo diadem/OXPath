@@ -54,7 +54,7 @@ public class OXPathContextNode implements Comparable<OXPathContextNode>{
 	/**
 	 * Constructor for the class.  Object "glues" together a DomNode in HtmlUnit's implementation, a reference to the parent marker,
 	 *  and a reference to the last marker used
-	 * @param iNode DomNode in HtmlUnit to use
+	 * @param iNode DomNode in browser to use
 	 * @param iParent reference to parent marker
 	 * @param iLast reference to current marker
 	 */
@@ -230,16 +230,36 @@ public class OXPathContextNode implements Comparable<OXPathContextNode>{
 	@Override
 	public int compareTo(OXPathContextNode other) {
 		//compare position of DOMNodes
+		//for this op to be consistent with equals, two OXPath nodes with different parent extraction markers but same DOMNode
+		//aren't allowed; this won't occur if using regular OXPath
 		DOMNode n1 = this.getNode();
 		DOMNode n2 = other.getNode();
 		
-		short position = n1.compareDocumentPosition(n2);
-		
+		short position;
+		try {
+			position = n1.compareDocumentPosition(n2);
+		} catch (NullPointerException e) {//in case the notional context is being compared to something
+			position=DOCUMENT_POSITION_DISCONNECTED;//not if both null, so as to be consistent with equals
+		}
+			
 		//This seems counterintuitive, but this is what we want based on Java's definition of "natural ordering" - for us, we assume document order to be the natural ordering, so preceding nodes have higher ordering values
-		if (position==0) return 0;
+		if (position==0) {
+			return other.getParent()-this.getParent();
+		}
 		else if ((position & DOCUMENT_POSITION_PRECEDING)== DOCUMENT_POSITION_PRECEDING) return 1;
 		else if ((position & DOCUMENT_POSITION_FOLLOWING)== DOCUMENT_POSITION_FOLLOWING) return -1;
-		else return Integer.MAX_VALUE;
+//		else return Integer.MAX_VALUE;
+		else if ((position &  DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC) == DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC) {
+			//in order to establish a consistent total ordering (albeit an arbitrary one), we use the hash values of the containing documents
+			int diff = n1.getOwnerDocument().hashCode()-n2.getOwnerDocument().hashCode();
+			if (diff!=0) return diff;
+			else throw new RuntimeException("Browser returned the same Document hashcode for disconnected nodes.");
+		}
+		else throw new RuntimeException("Browser broke compareDocumentPosition contract with return value");
+	}
+	
+	public int compareTo(OXPathContextNodeConstructed other) {
+		return Integer.MAX_VALUE;//we want all Browser-based nodes to be greater than our constructed nodes in the list
 	}
 
 	@Override
@@ -291,33 +311,33 @@ public class OXPathContextNode implements Comparable<OXPathContextNode>{
 	 * encodes the notional context node for beginning navigation; the parent and last are both 0, the id for the "results" root in the 
 	 * output
 	 */
-	private static final OXPathContextNode notionalContext = new OXPathContextNode(null,0,0);
+	private static final OXPathContextNode notionalContext = new OXPathContextNodeConstructed("notional","top",0,0);
 	
 	
 	// DocumentPosition constants
 	/**
 	 * Document position constants
 	 */
-	  static final short      DOCUMENT_POSITION_DISCONNECTED = 0x01;
+	  protected static final short      DOCUMENT_POSITION_DISCONNECTED = 0x01;
 	  /**
 		 * Document position constants
 		 */
-	  static final short      DOCUMENT_POSITION_PRECEDING    = 0x02;
+	  protected static final short      DOCUMENT_POSITION_PRECEDING    = 0x02;
 	  /**
 		 * Document position constants
 		 */
-	  static final short      DOCUMENT_POSITION_FOLLOWING    = 0x04;
+	  protected static final short      DOCUMENT_POSITION_FOLLOWING    = 0x04;
 	  /**
 		 * Document position constants
 		 */
-	  static final short      DOCUMENT_POSITION_CONTAINS     = 0x08;
+	  protected static final short      DOCUMENT_POSITION_CONTAINS     = 0x08;
 	  /**
 		 * Document position constants
 		 */
-	  static final short      DOCUMENT_POSITION_CONTAINED_BY = 0x10;
+	  protected static final short      DOCUMENT_POSITION_CONTAINED_BY = 0x10;
 	  /**
 		 * Document position constants
 		 */
-	  static final short      DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 0x20;
+	  protected static final short      DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 0x20;
 
 }

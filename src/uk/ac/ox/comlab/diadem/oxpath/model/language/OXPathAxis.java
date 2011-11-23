@@ -33,7 +33,7 @@ package uk.ac.ox.comlab.diadem.oxpath.model.language;
 //import diadem.common.web.dom.DOMCSSStyleDeclaration;
 import diadem.common.web.dom.DOMElement;
 import uk.ac.ox.comlab.diadem.oxpath.model.OXPathContextNode;
-import uk.ac.ox.comlab.diadem.oxpath.model.OXPathContextNodeStyle;
+import uk.ac.ox.comlab.diadem.oxpath.model.OXPathContextNodeConstructed;
 import uk.ac.ox.comlab.diadem.oxpath.model.OXPathType;
 import uk.ac.ox.comlab.diadem.oxpath.utils.OXPathException;
 
@@ -65,7 +65,7 @@ public enum OXPathAxis implements Axis {
 //					return new OXPathType();
 					throw new OXPathException("style::* not yet supported.");
 				}
-				OXPathContextNode wrappedNode = new OXPathContextNodeStyle(nodetest.getValue(),((DOMElement) node.getNode()).getComputedStyle().getPropertyValue(nodetest.getValue()),node.getParent(),node.getLast());
+				OXPathContextNode wrappedNode = new OXPathContextNodeConstructed(nodetest.getValue(),((DOMElement) node.getNode()).getComputedStyle().getPropertyValue(nodetest.getValue()),node.getParent(),node.getLast());
 				return new OXPathType(wrappedNode);
 			}
 			catch (NullPointerException e) {//from computed style
