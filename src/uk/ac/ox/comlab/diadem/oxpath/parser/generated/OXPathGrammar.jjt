@@ -671,7 +671,7 @@ void SimpleOXPathStepTail() #void:
 void SimpleOXPathDOSStepPath() #SimpleOXPathStepPath:
 {}
 {  DescendantOrSelfShort() SimpleOXPathStepPath()
-  {jjtThis.setStep(new OXPathStep(ForwardAxis.DESCENDANTORSELF,XPathNameTest.WILDCARD));
+  {jjtThis.setStep(new OXPathStep(ForwardAxis.DESCENDANTORSELF,XPathNodeTest.NODE));
    jjtThis.setHasList(true);
    }
 }
