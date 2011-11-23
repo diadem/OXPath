@@ -565,7 +565,7 @@ public class PAATEvalVisitor extends OXPathVisitorGenericAdaptor<PAATStateEvalSe
 			//first, handle URL actions
 			if (action.getActionType().equals(ActionType.URL)) {
 				this.webclient.navigate((String)action.getValue(),true);
-				DOMNode newRoot = this.webclient.getContentDOMWindow().getDocument();
+				DOMNode newRoot = this.webclient.getContentDOMWindow().getDocument().getDocumentElement();
 				return new OXPathContextNode(newRoot,contextNode.getParent(),contextNode.getLast());
 			}
 			DOMElement context = (DOMElement)contextNode.getNode();
