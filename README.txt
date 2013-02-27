@@ -1,6 +1,6 @@
 ----
 OXPath 1.0
-17 Nov 2011
+17 Nov 2012
 Copyright (c) 2011, DIADEM Project
 All rights reserved.
 -----
