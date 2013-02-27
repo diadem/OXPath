@@ -1,7 +1,9 @@
+This code is currently out of sync. A more recent, but precompiled version is available at https://code.google.com/p/oxpath/. We plan to update the code here soon. 
+
 ----
 OXPath 1.0
 17 Nov 2012
-Copyright (c) 2011, DIADEM Project
+Copyright (c) 2012, DIADEM Project
 All rights reserved.
 -----
 
